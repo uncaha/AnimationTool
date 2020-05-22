@@ -15,6 +15,16 @@ namespace AniPlayable
             public AssetBlendTree.BlendTreeType blendTreeType;
             public string stateName;
             public AssetTransitions.Transtions[] transtions;
+
+            public void AddState(PlayableAnimator playableAnimator, string groupName, int layer)
+            {
+                string tstateName = string.IsNullOrEmpty(stateName) ? clip.name : stateName;
+                PlayableStateController.StateInfo tinfo = playableAnimator.AddState(clip, tstateName, groupName, layer);
+                tinfo.transtions = transtions;
+                tinfo.speed = speed;
+            }
         }
+
+        public AnimationState data;
     }
 }

@@ -13,5 +13,45 @@ MonoBehaviour:
   m_Name: Cube_layer0_group_default
   m_EditorClassIdentifier: 
   groupName: 
-  motions: []
+  motions:
+  - clip: {fileID: 7400000, guid: 6b48156bdc09a417580b016a092aa6e2, type: 2}
+    threshold: 0
+    speed: 1
+    blendTreeType: 0
+    stateName: testani
+    transtions:
+    - solo: 0
+      mute: 0
+      isExit: 0
+      destinationStateMachineName: 
+      destinationStateName: test22
+      duration: 0.25
+      offset: 0
+      interruptionSource: 0
+      orderedInterruption: 1
+      exitTime: 0.7
+      hasExitTime: 1
+      hasFixedDuration: 1
+      canTransitionToSelf: 1
+      conditions: []
+  - clip: {fileID: 7400000, guid: 6bdace1e1df794476a7deff038d2166f, type: 2}
+    threshold: 0
+    speed: 1
+    blendTreeType: 0
+    stateName: test22
+    transtions:
+    - solo: 0
+      mute: 0
+      isExit: 0
+      destinationStateMachineName: 
+      destinationStateName: testani
+      duration: 0.25
+      offset: 0
+      interruptionSource: 0
+      orderedInterruption: 1
+      exitTime: 0.7
+      hasExitTime: 1
+      hasFixedDuration: 1
+      canTransitionToSelf: 1
+      conditions: []
   blendTrees: []

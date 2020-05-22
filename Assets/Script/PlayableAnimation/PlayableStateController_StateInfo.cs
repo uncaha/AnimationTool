@@ -10,6 +10,7 @@ namespace AniPlayable
     {
         public class StateInfo
         {
+            public AssetTransitions.Transtions[] transtions;
             #region method
             public void Initialize(string name, WrapMode wrapMode)
             {
@@ -19,12 +20,20 @@ namespace AniPlayable
 
             public float GetTime()
             {
-                if (m_TimeIsUpToDate)
-                    return m_Time;
-
-                m_Time = (float)m_Playable.GetTime();
-                m_TimeIsUpToDate = true;
+                if(!m_TimeIsUpToDate)
+                {
+                    m_Time = (float)m_Playable.GetTime();
+                    m_TimeIsUpToDate = true;
+                }
                 return m_Time;
+            }
+
+            public float Process
+            {
+                get
+                {
+                    return m_TimePrecess;
+                }
             }
 
             public void SetTime(float newTime)
@@ -32,6 +41,7 @@ namespace AniPlayable
                 m_Time = newTime;
                 m_Playable.ResetTime(m_Time);
                 m_Playable.SetDone(m_Time >= m_Playable.GetDuration());
+                runTImer = newTime;
             }
 
             public void Enable()
@@ -41,6 +51,7 @@ namespace AniPlayable
 
                 m_EnabledDirty = true;
                 m_Enabled = true;
+                transtioning = false;
             }
 
             public void Disable()
@@ -49,6 +60,7 @@ namespace AniPlayable
 
                 m_EnabledDirty = true;
                 m_Enabled = false;
+                transtioning = false;
             }
 
             public void Pause()
@@ -288,6 +300,7 @@ namespace AniPlayable
 
             private float m_Time;
 
+            private float m_TimePrecess = 0;
             public float speed
             {
                 get { return (float)m_Playable.GetSpeed(); }
@@ -327,8 +340,43 @@ namespace AniPlayable
             private bool m_WeightDirty;
             private bool m_EnabledDirty;
 
-            public void InvalidateTime() { m_TimeIsUpToDate = false; }
+            public void InvalidateTime() 
+            { 
+                m_TimeIsUpToDate = false; 
+            }
             private bool m_TimeIsUpToDate;
+
+            float runTImer = 0;
+            public void UpdateData(float dt)
+            {
+                if(!enabled) return;
+                runTImer += dt;
+                float tmaxTime = m_ClipLength * Mathf.Abs(speed);
+                m_TimePrecess = Mathf.Clamp01(runTImer / (tmaxTime));
+                if (wrapMode == WrapMode.Once)
+                {
+                    if (runTImer > tmaxTime)
+                    {
+                        runTImer = 0;
+                    }
+                }
+
+            }
+            bool transtioning = false;
+            public bool UpdateTransitions(PlayableStateController.StateLayer pLayer)
+            {
+                if(transtions == null || transtioning) return false;
+                for (int i = 0; i < transtions.Length; i++)
+                {
+                    var ttrans = transtions[i];
+                    if(ttrans.exitTime < m_TimePrecess)
+                    {
+                        transtioning = true;
+                        pLayer.Crossfade(ttrans.destinationStateName,ttrans.duration,false);
+                    }
+                }
+                return false;
+            }
             #endregion
 
             #endregion

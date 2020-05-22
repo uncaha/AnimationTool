@@ -110,31 +110,31 @@ namespace AniPlayable
             m_StateController.Crossfade(stateName, fixedTime, false, layer);
         }
 
-        public void AddState(AnimationClip clip, string stateName, string groupName = null, int layer = 0)
+        public PlayableStateController.StateInfo AddState(AnimationClip clip, string stateName, string groupName = null, int layer = 0)
         {
             if (clip == null)
             {
                 Debug.LogWarningFormat("clip :{0} is null!", stateName);
-                return;
+                return null;
             }
             AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(m_Graph, clip);
             if (!clip.isLooping || clip.wrapMode == WrapMode.Once)
             {
                 clipPlayable.SetDuration(clip.length);
             }
-            m_StateController.AddState(stateName, clipPlayable, clip, groupName, layer);
+            return m_StateController.AddState(stateName, clipPlayable, clip, groupName, layer);
         }
 
-        public void AddBlendTree(PlayableStateController.BlendTreeConfig[] configs, string paramName, string stateName = null, string groupName = null, int layer = 0)
+        public PlayableStateController.StateInfo AddBlendTree(PlayableStateController.BlendTreeConfig[] configs, string paramName, string stateName = null, string groupName = null, int layer = 0)
         {
-            if (configs == null) return;
+            if (configs == null) return null;
             for (int i = 0; i < configs.Length; i++)
             {
                 AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(m_Graph, configs[i].clip);
                 configs[i].playable = clipPlayable;
             }
             Playable playable = Playable.Create(m_Graph, 1);
-            m_StateController.AddBlendTree(stateName, playable, configs, paramName, groupName, layer);
+            return m_StateController.AddBlendTree(stateName, playable, configs, paramName, groupName, layer);
         }
     }
 }

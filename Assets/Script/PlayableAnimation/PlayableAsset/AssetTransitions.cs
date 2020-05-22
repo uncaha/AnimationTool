@@ -10,7 +10,11 @@ namespace AniPlayable
         [System.Serializable]
         public class Transtions
         {
-            public string targetName;
+            public bool solo;
+            public bool mute;
+            public bool isExit;
+            public string destinationStateMachineName;
+            public string destinationStateName;
             public float duration;
             public float offset;
             public TransitionInterruptionSource interruptionSource;
@@ -19,10 +23,16 @@ namespace AniPlayable
             public bool hasExitTime;
             public bool hasFixedDuration;
             public bool canTransitionToSelf;
+            public AssetCondition.Condition[] conditions;
 
             public void CopyData(AnimatorStateTransition pSource)
             {
-                targetName = pSource.destinationState.name;
+                if(pSource == null) return;
+                solo = pSource.solo;
+                mute = pSource.mute;
+                isExit = pSource.isExit;
+                destinationStateMachineName = pSource.destinationStateMachine != null ? pSource.destinationStateMachine.name : null;
+                destinationStateName = pSource.destinationState != null ? pSource.destinationState.name : null;
                 duration = pSource.duration;
                 offset = pSource.offset;
                 interruptionSource = pSource.interruptionSource;
@@ -31,6 +41,15 @@ namespace AniPlayable
                 hasExitTime = pSource.hasExitTime;
                 hasFixedDuration = pSource.hasFixedDuration;
                 canTransitionToSelf = pSource.canTransitionToSelf;
+
+                var tcondions = pSource.conditions;
+                conditions = new AssetCondition.Condition[tcondions.Length];
+                for (int i = 0; i < conditions.Length; i++)
+                {
+                    AssetCondition.Condition item = new AssetCondition.Condition();
+                    item.CopyData(ref tcondions[i]);
+                    conditions[i] = item;
+                }
             }
         }
         public Transtions data;

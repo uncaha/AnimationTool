@@ -33,7 +33,7 @@ namespace AniPlayable
                     if (!string.IsNullOrEmpty(exportPath))
                     {
                         PlayableAnimatorUtil.GetInstance().ExportToAsset(exportPath, exportObject);
-                        this.Close();
+                        //this.Close();
                     }
                 }
                 else

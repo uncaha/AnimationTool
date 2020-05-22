@@ -152,16 +152,18 @@ namespace AniPlayable
         #endregion
 
         #region State
-        public void AddState(string stateName, Playable playable, AnimationClip clip, string groupName = null, int layer = 0)
+        public StateInfo AddState(string stateName, Playable playable, AnimationClip clip, string groupName = null, int layer = 0)
         {
             StateLayer stateLayer = GetStateLayer(layer);
-            if (stateLayer != null) { stateLayer.AddState(stateName, false, playable, clip, groupName); }
+            if (stateLayer != null) { return stateLayer.AddState(stateName, false, playable, clip, groupName); }
+            return null;
         }
 
-        public void AddBlendTree(string stateName, Playable playable, BlendTreeConfig[] configs, string blendTreeParam, string groupName = null, int layer = 0)
+        public StateInfo AddBlendTree(string stateName, Playable playable, BlendTreeConfig[] configs, string blendTreeParam, string groupName = null, int layer = 0)
         {
             StateLayer stateLayer = GetStateLayer(layer);
-            if (stateLayer != null) { stateLayer.AddState(stateName, true, playable, null, groupName, configs, blendTreeParam); }
+            if (stateLayer != null) { return stateLayer.AddState(stateName, true, playable, null, groupName, configs, blendTreeParam); }
+            return null;
         }
 
         public void RemoveState(string stateName, int layer = 0)

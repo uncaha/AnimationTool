@@ -25,9 +25,7 @@ namespace AniPlayable
             {
                 for (int i = 0; i < motions.Length; i++)
                 {
-                    var motion = motions[i];
-                    string stateName = string.IsNullOrEmpty(motion.stateName) ? motion.clip.name : motion.stateName;
-                    playableAnimator.AddState(motion.clip, stateName, groupName, layer);
+                    motions[i].AddState(playableAnimator,groupName,layer);
                 }
             }
         }

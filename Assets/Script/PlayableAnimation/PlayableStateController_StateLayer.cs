@@ -129,7 +129,7 @@ namespace AniPlayable
                         continue;
 
                     state.InvalidateTime();
-
+                    state.UpdateData(deltaTime);
                     // 处理混合树状态
                     if (state.isBlendTree)
                     {
@@ -184,23 +184,26 @@ namespace AniPlayable
 
                     }
 
-                    // 处理非循环状态的自然关闭
-                    if (state.enabled && state.wrapMode == WrapMode.Once)
+                    if (state.enabled)
                     {
-                        bool stateIsDone = state.isDone;
-                        float speed = state.speed;
-                        float time = state.GetTime();
-                        float duration = state.playableDuration;
-
-                        stateIsDone |= speed < 0f && time < 0f;
-                        stateIsDone |= speed >= 0f && time >= duration;
-                        if (stateIsDone)
+                        if (state.wrapMode == WrapMode.Once)
                         {
-                            state.Stop();
-                            state.Disable();
-                            DisconnectInput(state.index);
+                            bool stateIsDone = state.isDone;
+                            float speed = state.speed;
+                            float time = state.GetTime();
+                            float duration = state.playableDuration;
 
+                            stateIsDone |= speed < 0f && time < 0f;
+                            stateIsDone |= speed >= 0f && time >= duration;
+                            if (stateIsDone)
+                            {
+                                state.Stop();
+                                state.Disable();
+                                DisconnectInput(state.index);
+                            }
                         }
+
+                        state.UpdateTransitions(this);
                     }
 
                     totalWeight += state.weight;
@@ -251,19 +254,19 @@ namespace AniPlayable
                 }
             }
 
-            public void AddState(string stateName, bool isBlendTree, Playable playable, AnimationClip clip = null, 
+            public StateInfo AddState(string stateName, bool isBlendTree, Playable playable, AnimationClip clip = null, 
                 string groupName = null, BlendTreeConfig[] blendTreePlayables = null, string blendTreeParam = null)
             {
                 if (FindState(stateName) != null)
                 {
                     Debug.LogErrorFormat("Add state fail, state:{0} has existed!", stateName);
-                    return;
+                    return null;
                 }
 
                 if (isBlendTree && (blendTreePlayables == null || blendTreeParam == null))
                 {
                     Debug.LogError("BlendTreePlayables or blendTreeParam is null but isBlendTree is true!");
-                    return;
+                    return null;
                 }
 
                 StateInfo state = new StateInfo();
@@ -298,6 +301,8 @@ namespace AniPlayable
                 }
 
                 m_Count++;
+
+                return state;
             }
 
             public void RemoveState(string stateName)

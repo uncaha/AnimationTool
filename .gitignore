@@ -1,0 +1,9 @@
+
+.vscode/settings.json
+.vscode/launch.json
+AnimationTool.sln
+Assembly-CSharp.csproj
+Assembly-CSharp-Editor.csproj
+Library
+Temp
+obj
