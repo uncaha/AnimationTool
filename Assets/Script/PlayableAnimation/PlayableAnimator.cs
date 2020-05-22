@@ -6,21 +6,26 @@ using UnityEngine.Animations;
 
 namespace AniPlayable
 {
-    [RequireComponent(typeof(Animator))]
     public class PlayableAnimator : MonoBehaviour
     {
         #region serlizeddata
+        [SerializeField]private AssetStateController _assetStateController;
         [SerializeField]protected string defaultState;
         [SerializeField]protected bool isAutoPlay = false;
+        [SerializeField]protected float sampleIntervalp;
+        public AnimatorUpdateMode mode = AnimatorUpdateMode.Normal;
+        #endregion
+
+        #region control
+        public bool isPlaying { get; protected set; }
+        public bool isPause { get; protected set; }
+        private UpdateObject updateObject;
         #endregion
         private PlayableGraph m_Graph;
         private Animator m_Animator;
         private Playable m_OutputPlayable;
         private PlayableStateController m_StateController;
         public PlayableStateController StateController {get { return m_StateController; } }
-
-        [SerializeField]
-        private AssetStateController _assetStateController;
 
         private bool m_IsInitialized = false;
 
@@ -48,9 +53,14 @@ namespace AniPlayable
         {
             if (m_IsInitialized) return;
             m_Animator = GetComponent<Animator>();
+            if(m_Animator != null)
+            {
+                Destroy(m_Animator);
+            }
+            m_Animator = gameObject.AddComponent<Animator>();
 
             m_Graph = PlayableGraph.Create();
-            m_Graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
+            m_Graph.SetTimeUpdateMode(DirectorUpdateMode.Manual);
             m_StateController = new PlayableStateController(m_Graph);
 
             var template = new PlayableAmimatorDriver();
@@ -59,54 +69,80 @@ namespace AniPlayable
 
             AnimationPlayableUtilities.Play(m_Animator, m_OutputPlayable, m_Graph);
 
+            m_Graph.Stop();
+
+            updateObject = new UpdateObject(this,UpdateGraph,mode);
+            PlayableUpdateManager.Reg(updateObject);
             m_IsInitialized = true;
+        }
+
+        float sampleTimer = 0;
+        public void UpdateGraph(float dt)
+        {
+            if(!isPlaying || isPause) return;
+            sampleTimer += dt;
+            if(sampleTimer > sampleIntervalp)
+            {
+                m_Graph.Evaluate(sampleTimer);
+                sampleTimer = 0;
+            }
         }
 
         private void OnEnable()
         {
-            
+
         }
 
         private void OnDisable()
         {
-            
+
         }
 
         private void OnDestroy()
         {
+            PlayableUpdateManager.UnReg(updateObject);
             m_Graph.Destroy();
         }
         #endregion
-
         
-
+        void GoPlaying()
+        {
+            isPlaying = true;
+            isPause = false;
+        }
         public void Play()
         {
+            GoPlaying();
             m_OutputPlayable.Play();
         }
 
         public void Pause()
         {
+            isPause = false;
             m_OutputPlayable.Pause();
         }
 
         public void Play(string stateName, int layer = 0)
         {
+            GoPlaying();
             m_StateController.EnableState(stateName, layer);
         }
 
         public void PlayInFixedTime(string stateName, float fixedTime, int layer = 0)
         {
+            GoPlaying();
             m_StateController.EnableState(stateName, fixedTime, layer);
         }
 
         public void Crossfade(string stateName, float normalnizeTime, int layer = 0)
         {
+            GoPlaying();
             m_StateController.Crossfade(stateName, normalnizeTime, true, layer);
         }
 
         public void CrossfadeInFixedTime(string stateName, float fixedTime, int layer = 0)
         {
+            GoPlaying();
             m_StateController.Crossfade(stateName, fixedTime, false, layer);
         }
 
