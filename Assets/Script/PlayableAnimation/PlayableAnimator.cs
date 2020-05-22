@@ -90,12 +90,12 @@ namespace AniPlayable
 
         private void OnEnable()
         {
-
+            m_Animator.enabled = true;
         }
 
         private void OnDisable()
         {
-
+            m_Animator.enabled = false;
         }
 
         private void OnDestroy()
