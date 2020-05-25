@@ -16,4 +16,22 @@ public class testPlay : MonoBehaviour
     {
         
     }
+
+    private void OnGUI() {
+        if(GUI.Button(new Rect(0,100,100f,30),"add testtrigger"))
+        {
+            animator.StateController.Params.SetBool("testtrigger",true);
+        }
+        if(GUI.Button(new Rect(0,0,100f,30f),"add test"))
+        {
+            animator.StateController.Params.SetInt("test",2);
+        }
+
+        if(GUI.Button(new Rect(0,50,100f,30),"add testbool"))
+        {
+             animator.StateController.Params.SetBool("testbool",true);
+        }
+
+        
+    }
 }
