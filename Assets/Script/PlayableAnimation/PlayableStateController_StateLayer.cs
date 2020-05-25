@@ -419,7 +419,7 @@ namespace AniPlayable
                     if (state == null)
                         continue;
 
-                    if (state.stateName == stateName)
+                    if (state.stateName.Equals(stateName))
                     {
                         state.Enable();
                         stateIndex = state.index;

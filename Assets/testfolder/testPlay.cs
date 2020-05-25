@@ -26,12 +26,22 @@ public class testPlay : MonoBehaviour
         {
             animator.SetInt("test",2);
         }
-
         if(GUI.Button(new Rect(0,50,100f,30),"add testbool"))
         {
              animator.SetBool("testbool",true);
         }
 
-        
+        if(GUI.Button(new Rect(300,100,100f,30),"remove testtrigger"))
+        {
+            animator.SetBool("testtrigger",false);
+        }
+        if(GUI.Button(new Rect(300,0,100f,30f),"remove test"))
+        {
+            animator.SetInt("test",0);
+        }
+        if(GUI.Button(new Rect(300,50,100f,30),"remove testbool"))
+        {
+             animator.SetBool("testbool",false);
+        }
     }
 }
