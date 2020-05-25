@@ -21,6 +21,7 @@ namespace AniPlayable
             }
             return m_Params[pam.name];
         }
+
         public AnimatorParameter AddBool(string name)
         {
             if(m_Params.ContainsKey(name))
@@ -58,6 +59,17 @@ namespace AniPlayable
             tdata.name = name;
             tdata.type = AnimatorControllerParameterType.Int;
             return AddParameter(tdata);
+        }
+
+        public AnimatorParameter GetParameter(string pName)
+        {
+            if (!m_Params.ContainsKey(pName)) return null;
+            return m_Params[pName];
+        }
+        public AnimatorParameter GetParameter(int id)
+        {
+            if(id < 0 || id >= m_ParamList.Count) return null;
+            return m_ParamList[id];
         }
 
         public bool GetBool(string name)
@@ -150,7 +162,7 @@ namespace AniPlayable
             m_ParamList[id].intValue = val;
         }
 
-        public bool ContainsFloat(string name)
+        public bool Contains(string name)
         {
             return m_Params.ContainsKey(name);
         }

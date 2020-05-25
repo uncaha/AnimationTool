@@ -4,8 +4,11 @@ using UnityEngine;
 using UnityEditor.Animations;
 namespace AniPlayable.Module
 {
-    public class AnimatorModule
+    public abstract class AnimatorModule
     {
-        
+        virtual public void Update(float dt)
+        {
+
+        }
     }
 }

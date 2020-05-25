@@ -203,7 +203,7 @@ namespace AniPlayable
                             }
                         }
 
-                        state.UpdateTransitions(this);
+                        state.UpdateTransitions(deltaTime,this);
                     }
 
                     totalWeight += state.weight;

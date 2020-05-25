@@ -340,7 +340,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 116c91e9f2e235c468e3d48357ed7937, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _assetStateController: {fileID: 0}
+  _assetStateController: {fileID: 11400000, guid: d9a1ada8c71464ec5af2c784d15c9a2c,
+    type: 2}
   defaultState: testani
   isAutoPlay: 1
   sampleIntervalp: 0

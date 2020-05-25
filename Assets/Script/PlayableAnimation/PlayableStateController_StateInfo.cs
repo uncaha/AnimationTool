@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Playables;
 using UnityEngine.Animations;
-
+using AniPlayable.Module;
 namespace AniPlayable
 {
     public partial class PlayableStateController
     {
         public class StateInfo
         {
-            public AssetTransitions.Transtions[] transtions;
+            public AnimatorTransition[] transtions;
             #region method
             public void Initialize(string name, WrapMode wrapMode)
             {
@@ -363,17 +363,21 @@ namespace AniPlayable
 
             }
             bool transtioning = false;
-            public bool UpdateTransitions(PlayableStateController.StateLayer pLayer)
+            public bool UpdateTransitions(float dt, PlayableStateController.StateLayer pLayer)
             {
                 if(transtions == null || transtioning) return false;
                 for (int i = 0; i < transtions.Length; i++)
                 {
                     var ttrans = transtions[i];
-                    if(ttrans.exitTime < m_TimePrecess)
+                    if(ttrans.CheckCondition())
                     {
-                        transtioning = true;
-                        pLayer.Crossfade(ttrans.destinationStateName,ttrans.duration,false);
+                        if (ttrans.exitTime < m_TimePrecess)
+                        {
+                            transtioning = true;
+                            pLayer.Crossfade(ttrans.destinationStateName, ttrans.duration, false);
+                        }
                     }
+
                 }
                 return false;
             }

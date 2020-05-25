@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using AniPlayable.Module;
 namespace AniPlayable
 {
     public class AssetState : ScriptableObject
@@ -20,8 +20,16 @@ namespace AniPlayable
             {
                 string tstateName = string.IsNullOrEmpty(stateName) ? clip.name : stateName;
                 PlayableStateController.StateInfo tinfo = playableAnimator.AddState(clip, tstateName, groupName, layer);
-                tinfo.transtions = transtions;
                 tinfo.speed = speed;
+                if(transtions != null && transtions.Length > 0)
+                {
+                    AnimatorTransition[] ttransObj = new AnimatorTransition[transtions.Length];
+                    tinfo.transtions = ttransObj;
+                    for (int i = 0; i < ttransObj.Length; i++)
+                    {
+                        ttransObj[i] = new AnimatorTransition(playableAnimator,transtions[i],i);
+                    }
+                }
             }
         }
 

@@ -51,7 +51,7 @@ namespace AniPlayable
                 configs[i].speed = motions[i].speed;
                 configs[i].threshold = motions[i].threshold;
             }
-            if (playableAnimator.StateController.Params.ContainsFloat(parameter) == false)
+            if (playableAnimator.StateController.Params.Contains(parameter) == false)
             {
                 playableAnimator.StateController.Params.AddFloat(parameter);
             }
