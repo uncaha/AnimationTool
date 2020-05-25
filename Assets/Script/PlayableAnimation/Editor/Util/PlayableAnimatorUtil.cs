@@ -34,6 +34,15 @@ namespace AniPlayable
             return asset;
         }
 
+        public AssetParameter CreatParameterAsset(string name)
+        {
+            AssetParameter asset = ScriptableObject.CreateInstance<AssetParameter>();
+            asset.name = name;
+            AssetDatabase.CreateAsset(asset, GetNewAssetPath(name));
+            AssetDatabase.Refresh();
+            return asset;
+        }
+
         public AssetStateLayer CreateLayerAsset(string name)
         {
             AssetStateLayer asset = ScriptableObject.CreateInstance<AssetStateLayer>();
@@ -101,6 +110,22 @@ namespace AniPlayable
             // 生成动画控制器
             AssetStateController assetCtrl = CreateControllerAsset(animCtrl.name);
 
+            //生成Parameter
+            if(animCtrl.parameters != null && animCtrl.parameters.Length > 0)
+            {
+                AssetParameter paramerters = CreatParameterAsset(string.Format("{0}_Paramerters", animCtrl.name));
+                assetCtrl.parameters = paramerters;
+
+                int tlen = animCtrl.parameters.Length;
+                paramerters.parameters = new AssetParameter.Parameter[tlen];
+                for (int i = 0; i < tlen; i++)
+                {
+                    AssetParameter.Parameter tpamdata = new AssetParameter.Parameter();
+                    tpamdata.CopyData(animCtrl.parameters[i]);
+                    paramerters.parameters[i] = tpamdata;
+                }
+            }
+            
             // 生成动画层
             AnimatorControllerLayer[] animCtrlLayers = animCtrl.layers;
             assetCtrl.stateLayers = new AssetStateLayer[animCtrlLayers.Length];

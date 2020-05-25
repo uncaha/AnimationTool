@@ -32,7 +32,15 @@ namespace AniPlayable
                 {
                     if (!string.IsNullOrEmpty(exportPath))
                     {
-                        PlayableAnimatorUtil.GetInstance().ExportToAsset(exportPath, exportObject);
+                        try
+                        {
+                            PlayableAnimatorUtil.GetInstance().ExportToAsset(exportPath, exportObject);
+                        }
+                        catch (System.Exception err)
+                        {
+                            Debug.LogError(err);
+                        }
+                        
                         //this.Close();
                     }
                 }

@@ -20,5 +20,7 @@ namespace AniPlayable
                 threshold = pSource.threshold;
             }
         }
+
+        public Condition condition;
     }
 }

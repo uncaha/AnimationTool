@@ -1,296 +1,158 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using AniPlayable.Module;
 namespace AniPlayable
 {
     public class PlayableAnimatorParameter : IAnimatorParameter
     {
-        private class Parameter<T>
-        {
-            public string name;
-            public T val;
-            public bool isVaild;
+        
 
-            public Parameter(string name)
+        private Dictionary<string, AnimatorParameter> m_Params = new Dictionary<string,AnimatorParameter>(5);
+        private List<AnimatorParameter> m_ParamList = new List<AnimatorParameter>(5);
+
+        public AnimatorParameter AddParameter(AssetParameter.Parameter pam)
+        {
+            if (!m_Params.ContainsKey(pam.name))
             {
-                this.name = name;
-                val = default(T);
-                isVaild = true;
+                AnimatorParameter item = new AnimatorParameter(pam, m_Params.Count);
+                m_Params.Add(item.name, item);
+                m_ParamList.Add(item);
             }
+            return m_Params[pam.name];
+        }
+        public AnimatorParameter AddBool(string name)
+        {
+            if(m_Params.ContainsKey(name))
+            {
+                Debug.LogError("the Key is aready in list.key = " + name);
+                return m_Params[name];
+            }
+            AssetParameter.Parameter tdata = new AssetParameter.Parameter();
+            tdata.name = name;
+            tdata.type = AnimatorControllerParameterType.Bool;
+            return AddParameter(tdata);
         }
 
-        private List<Parameter<int>> m_IntParams = new List<Parameter<int>>();
-        private List<Parameter<float>> m_FloatParams = new List<Parameter<float>>();
-        private List<Parameter<bool>> m_BoolParams = new List<Parameter<bool>>();
-
-        public int AddBool(string name)
+        public AnimatorParameter AddFloat(string name)
         {
-            var param = new Parameter<bool>(name);
-
-            int emptyIndex = m_BoolParams.FindIndex(b => b.isVaild == false);
-            if (emptyIndex == -1)
+            if(m_Params.ContainsKey(name))
             {
-                emptyIndex = m_BoolParams.Count;
-                m_BoolParams.Add(param);
+                Debug.LogError("the Key is aready in list.key = " + name);
+                return m_Params[name];
             }
-            else
-            {
-                m_BoolParams[emptyIndex] = param;
-            }
-
-            return emptyIndex;
+            AssetParameter.Parameter tdata = new AssetParameter.Parameter();
+            tdata.name = name;
+            tdata.type = AnimatorControllerParameterType.Float;
+            return AddParameter(tdata);
         }
 
-        public int AddFloat(string name)
+        public AnimatorParameter AddInt(string name)
         {
-            var param = new Parameter<float>(name);
-
-            int emptyIndex = m_FloatParams.FindIndex(b => b.isVaild == false);
-            if (emptyIndex == -1)
+            if (m_Params.ContainsKey(name))
             {
-                emptyIndex = m_FloatParams.Count;
-                m_FloatParams.Add(param);
+                Debug.LogError("the Key is aready in list.key = " + name);
+                return m_Params[name];
             }
-            else
-            {
-                m_FloatParams[emptyIndex] = param;
-            }
-
-            return emptyIndex;
-        }
-
-        public int AddInt(string name)
-        {
-            var param = new Parameter<int>(name);
-
-            int emptyIndex = m_IntParams.FindIndex(b => b.isVaild == false);
-            if (emptyIndex == -1)
-            {
-                emptyIndex = m_IntParams.Count;
-                m_IntParams.Add(param);
-            }
-            else
-            {
-                m_IntParams[emptyIndex] = param;
-            }
-
-            return emptyIndex;
+            AssetParameter.Parameter tdata = new AssetParameter.Parameter();
+            tdata.name = name;
+            tdata.type = AnimatorControllerParameterType.Int;
+            return AddParameter(tdata);
         }
 
         public bool GetBool(string name)
         {
-            bool res = default(bool);
-            int find = m_BoolParams.FindIndex(b => b.isVaild && b.name == name);
-            if (find == -1)
+            bool ret = default(bool);
+            if (m_Params.ContainsKey(name))
             {
-                Debug.LogErrorFormat("cant find name: {0} bool parameter", name);
+                ret = m_Params[name].boolValue;
             }
-            else
-            {
-                res = m_BoolParams[find].val;
-            }
-
-            return res;
+            return ret;
         }
 
         public bool GetBool(int id)
         {
-            bool res = default(bool);
-            if (id >= m_BoolParams.Count)
-            {
-                Debug.LogErrorFormat("cant find id: {0} bool parameter", id);
-            }
-
-            else
-            {
-                var param = m_BoolParams[id];
-                if (param.isVaild == false)
-                {
-                    Debug.LogErrorFormat("id: {0} bool parameter is Invalid", id);
-                }
-                else
-                {
-                    res = param.val;
-                }
-            }
-
-            return res;
+            if(id < 0 || id >= m_ParamList.Count) return default(bool);
+            return m_ParamList[id].boolValue;
         }
 
         public float GetFloat(string name)
         {
-            float res = default(float);
-            int find = m_FloatParams.FindIndex(b => b.isVaild && b.name == name);
-            if (find == -1)
+            float ret = default(float);
+            if (m_Params.ContainsKey(name))
             {
-                Debug.LogErrorFormat("cant find name: {0} float parameter", name);
+                ret = m_Params[name].floatValue;
             }
-            else
-            {
-                res = m_FloatParams[find].val;
-            }
-
-            return res;
+            return ret;
         }
 
         public float GetFloat(int id)
         {
-            float res = default(float);
-            if (id >= m_BoolParams.Count)
-            {
-                Debug.LogErrorFormat("cant find id: {0} float parameter", id);
-            }
-
-            else
-            {
-                var param = m_FloatParams[id];
-                if (param.isVaild == false)
-                {
-                    Debug.LogErrorFormat("id: {0} float parameter is Invalid", id);
-                }
-                else
-                {
-                    res = param.val;
-                }
-            }
-
-            return res;
+            if(id < 0 || id >= m_ParamList.Count) return default(float);
+            return m_ParamList[id].floatValue;
         }
 
         public int GetInt(string name)
         {
-            int res = default(int);
-            int find = m_IntParams.FindIndex(b => b.isVaild && b.name == name);
-            if (find == -1)
+            int ret = default(int);
+            if (m_Params.ContainsKey(name))
             {
-                Debug.LogErrorFormat("cant find name: {0} int parameter", name);
+                ret = m_Params[name].intValue;
             }
-            else
-            {
-                res = m_IntParams[find].val;
-            }
-
-            return res;
+            return ret;
         }
 
         public int GetInt(int id)
         {
-            int res = default(int);
-            if (id >= m_BoolParams.Count)
-            {
-                Debug.LogErrorFormat("cant find id: {0} int parameter", id);
-            }
-
-            else
-            {
-                var param = m_IntParams[id];
-                if (param.isVaild == false)
-                {
-                    Debug.LogErrorFormat("id: {0} int parameter is Invalid", id);
-                }
-                else
-                {
-                    res = param.val;
-                }
-            }
-
-            return res;
+            if (id < 0 || id >= m_ParamList.Count) return default(int);
+            return m_ParamList[id].intValue;
         }
 
         public void SetBool(string name, bool val)
         {
-            int find = m_BoolParams.FindIndex(b => b.isVaild && b.name == name);
-            if (find == -1)
+            if (m_Params.ContainsKey(name))
             {
-                Debug.LogErrorFormat("cant find name: {0} bool parameter!", name);
-                return;
+                m_Params[name].boolValue = val;
             }
-
-            m_BoolParams[find].val = val;
         }
 
         public void SetBool(int id, bool val)
         {
-            if (id >= m_BoolParams.Count)
-            {
-                Debug.LogErrorFormat("cant find id: {0} bool parameter", id);
-                return;
-            }
-
-            var param = m_BoolParams[id];
-            if (param.isVaild == false)
-            {
-                Debug.LogErrorFormat("id: {0} bool parameter is Invalid", id);
-                return;
-            }
-
-            param.val = val;
+            if (id < 0 || id >= m_ParamList.Count) return;
+            m_ParamList[id].boolValue = val;
         }
 
         public void SetFloat(string name, float val)
         {
-            int find = m_FloatParams.FindIndex(b => b.isVaild && b.name == name);
-            if (find == -1)
+            if (m_Params.ContainsKey(name))
             {
-                Debug.LogErrorFormat("cant find name: {0} float parameter!", name);
-                return;
+                m_Params[name].floatValue = val;
             }
-
-            m_FloatParams[find].val = val;
         }
 
         public void SetFloat(int id, float val)
         {
-            if (id >= m_FloatParams.Count)
-            {
-                Debug.LogErrorFormat("cant find id: {0} float parameter", id);
-                return;
-            }
-
-            var param = m_FloatParams[id];
-            if (param.isVaild == false)
-            {
-                Debug.LogErrorFormat("id: {0} float parameter is Invalid", id);
-                return;
-            }
-
-            param.val = val;
+            if (id < 0 || id >= m_ParamList.Count) return;
+            m_ParamList[id].floatValue = val;
         }
 
         public void SetInt(string name, int val)
         {
-            int find = m_IntParams.FindIndex(b => b.isVaild && b.name == name);
-            if (find == -1)
+            if (m_Params.ContainsKey(name))
             {
-                Debug.LogErrorFormat("cant find name: {0} int parameter!", name);
-                return;
+                m_Params[name].intValue = val;
             }
-
-            m_IntParams[find].val = val;
         }
 
         public void SetInt(int id, int val)
         {
-            if (id >= m_IntParams.Count)
-            {
-                Debug.LogErrorFormat("cant find id: {0} int parameter", id);
-                return;
-            }
-
-            var param = m_IntParams[id];
-            if (param.isVaild == false)
-            {
-                Debug.LogErrorFormat("id: {0} bool parameter is Invalid", id);
-                return;
-            }
-
-            param.val = val;
+            if (id < 0 || id >= m_ParamList.Count) return;
+            m_ParamList[id].intValue = val;
         }
 
         public bool ContainsFloat(string name)
         {
-            return (m_FloatParams.FindIndex(p => p.isVaild && p.name == name) != -1);
+            return m_Params.ContainsKey(name);
         }
     }
 }
