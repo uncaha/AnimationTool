@@ -172,6 +172,36 @@ namespace AniPlayable
             Playable playable = Playable.Create(m_Graph, 1);
             return m_StateController.AddBlendTree(stateName, playable, configs, paramName, groupName, layer);
         }
+
+        public void SetBool(string pKey, bool pValue)
+        {
+            StateController.Params.SetBool(pKey, pValue);
+        }
+
+        public void SetInt(string pKey, int pValue)
+        {
+            StateController.Params.SetInt(pKey,pValue);
+        }
+
+        public void SetFloat(string pKey, float pValue)
+        {
+            StateController.Params.SetFloat(pKey,pValue);
+        }
+
+        public bool GetBool(string pKey)
+        {
+            return StateController.Params.GetBool(pKey);
+        }
+
+        public int GetInt(string pKey)
+        {
+            return StateController.Params.GetInt(pKey);
+        }
+
+        public float GetFloat(string pKey)
+        {
+            return StateController.Params.GetFloat(pKey);
+        }
     }
 }
 
