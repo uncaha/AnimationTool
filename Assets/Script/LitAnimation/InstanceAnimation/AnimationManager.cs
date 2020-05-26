@@ -52,27 +52,27 @@ namespace AniPlayable.InstanceAnimation
                 return info;
             }
 
-#if UNITY_IPHONE || UNITY_ANDROID
-            Debug.Assert(m_useBundle);
-			if (m_mainBundle == null)
-            	Debug.LogError("You should call LoadAnimationAssetBundle first.");
-#endif
-            if (m_useBundle)
-            {
-                CreateAnimationRequest request = new CreateAnimationRequest();
-                request.prefab = prefab;
-                request.instance = instance;
-                if (m_mainBundle != null)
-                {
-                    StartCoroutine(LoadAnimationInfoFromAssetBundle(request));
-                }
-                else
-                {
-                    m_requestList.Add(request);
-                }
-                return null;
-            }
-            else
+// #if UNITY_IPHONE || UNITY_ANDROID
+//             Debug.Assert(m_useBundle);
+// 			if (m_mainBundle == null)
+//             	Debug.LogError("You should call LoadAnimationAssetBundle first.");
+// #endif
+//             if (m_useBundle)
+//             {
+//                 CreateAnimationRequest request = new CreateAnimationRequest();
+//                 request.prefab = prefab;
+//                 request.instance = instance;
+//                 if (m_mainBundle != null)
+//                 {
+//                     StartCoroutine(LoadAnimationInfoFromAssetBundle(request));
+//                 }
+//                 else
+//                 {
+//                     m_requestList.Add(request);
+//                 }
+//                 return null;
+//             }
+//             else
                 return CreateAnimationInfoFromFile(prefab);
         }
 
@@ -127,53 +127,21 @@ namespace AniPlayable.InstanceAnimation
         private InstanceAnimationInfo CreateAnimationInfoFromFile(GameObject prefab)
         {
             Debug.Assert(prefab != null);
-            string path;
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-            path = Application.dataPath + "/AnimationTexture/";
-#elif UNITY_STANDALONE_OSX
-		    path = Application.dataPath + "/Resources/Data/StreamingAssets/AnimationTexture/";
-#endif
-
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN || UNITY_STANDALONE_OSX
-            //Debug.Log("This is the data path:" + path);
-            FileStream file = File.Open(path + prefab.name + ".bytes", FileMode.Open);
-            Debug.Assert(file.CanRead);
-            InstanceAnimationInfo info = new InstanceAnimationInfo();
-            BinaryReader reader = new BinaryReader(file);
-            info.listAniInfo = ReadAnimationInfo(reader);
-            info.extraBoneInfo = ReadExtraBoneInfo(reader);
-            m_animationInfo.Add(prefab, info);
-            AnimationInstancingMgr.Instance.ImportAnimationTexture(prefab.name, reader);
-            file.Close();
-#elif UNITY_IPHONE
-		    path = "file://" + Application.dataPath +"/Raw/AnimationTexture/";
-		    WWW w = new WWW(path + prefab.name + ".bytes");
-		    //wwwLoad(path + "/boneTexture/" + prefab.name + ".aniData", SetupAniInfo);
-		    while (!w.isDone){}
-		    //if (w.error)
-		    Debug.Log("This is the data path:" + path);
-		    Debug.Log(w.error);
-            BinaryReader reader = new BinaryReader(new MemoryStream(w.bytes));	
+            string path = "AnimationTexture/" + prefab.name;
+            TextAsset tdata = Resources.Load<TextAsset>(path);
+            if(tdata == null)
+            {
+                Debug.LogError("Can't load asset.path = " + path);
+                return null;
+            }
+            BinaryReader reader = new BinaryReader(new MemoryStream(tdata.bytes));
             InstanceAnimationInfo info = new InstanceAnimationInfo();
             info.listAniInfo = ReadAnimationInfo(reader);
             info.extraBoneInfo = ReadExtraBoneInfo(reader);
             m_animationInfo.Add(prefab, info);
             AnimationInstancingMgr.Instance.ImportAnimationTexture(prefab.name, reader);
-#elif UNITY_ANDROID
-            path = "jar:file://" + Application.dataPath + "!/assets/";
-            WWW w = new WWW(path + "AnimationTexture/" + prefab.name + ".bytes");
-            //wwwLoad(path + "/boneTexture/" + thisPrefab.name + ".aniData", SetupAniInfo);
-            while (!w.isDone) { }
-//             BinaryReader reader = new BinaryReader(new MemoryStream(w.bytes));
-//             List<AnimationInfo> listInfo = ReadAnimationInfo(reader);
-//             m_animationInfo.Add(prefab, listInfo);
-            BinaryReader reader = new BinaryReader(new MemoryStream(w.bytes));	
-            InstanceAnimationInfo info = new InstanceAnimationInfo();
-            info.listAniInfo = ReadAnimationInfo(reader);
-            info.extraBoneInfo = ReadExtraBoneInfo(reader);
-            m_animationInfo.Add(prefab, info);
-            AnimationInstancingMgr.Instance.ImportAnimationTexture(prefab.name, reader);
-#endif
+            reader.Close();
+            Resources.UnloadAsset(tdata);
             return info;
         }
 

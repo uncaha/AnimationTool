@@ -326,131 +326,6 @@ namespace AniPlayable.InstanceAnimation
                 }
             }
         }
-
-        void BakeAnimation()
-        {
-#if UNITY_ANDROID || UNITY_IPHONE
-        Debug.LogError("You can't bake animations on IOS or Android. Please switch to PC.");
-        return;
-#endif
-            if (generatedPrefab != null)
-            {
-                GameObject obj = Instantiate(generatedPrefab);
-                obj.transform.position = Vector3.zero;
-                obj.transform.rotation = Quaternion.identity;
-                Animator animator = obj.GetComponentInChildren<Animator>();
-
-                AnimationInstancing script = obj.GetComponent<AnimationInstancing>();
-                Debug.Assert(script);
-                SkinnedMeshRenderer[] meshRender = obj.GetComponentsInChildren<SkinnedMeshRenderer>();
-                List<Matrix4x4> bindPose = new List<Matrix4x4>(150);
-                Transform[] boneTransform = RuntimeHelper.MergeBone(meshRender, bindPose);
-                Reset();
-                AddMeshVertex2Generate(meshRender, boneTransform, bindPose.ToArray());
-
-                Transform rootNode = meshRender[0].rootBone;
-                for (int j = 0; j != meshRender.Length; ++j)
-                {
-                    meshRender[j].enabled = true;
-                }
-
-                int frames = 0;
-                var clips = GetClips(true);
-                foreach (AnimationClip animClip in clips)
-                {
-                    //float lastFrameTime = 0;
-                    int aniName = animClip.name.GetHashCode();
-                    int bakeFrames = Mathf.CeilToInt(animClip.length * aniFps);
-
-                    AnimationInfo info = new AnimationInfo();
-                    info.animationNameHash = aniName;
-                    info.animationIndex = frames;
-                    info.totalFrame = bakeFrames;
-
-                    //bool rotationRootMotion = false, positionRootMotion = false;
-                    //for (int i = 0; i < bakeFrames; i += 1)
-                    //{
-                    //    float bakeDelta = Mathf.Clamp01(((float)i / bakeFrames));
-                    //    float animationTime = bakeDelta * animClip.length;
-                    //    animClip.SampleAnimation(obj, animationTime);
-
-                    //    info.position[i] = rootNode.localPosition;
-                    //    info.rotation[i] = rootNode.localRotation;
-                    //    if (i > 0 && info.position[i] != info.position[i - 1])
-                    //    {
-                    //        positionRootMotion = true;
-                    //    }
-                    //    if (i > 0 && info.rotation[i] != info.rotation[i - 1])
-                    //    {
-                    //        rotationRootMotion = true;
-                    //    }
-                    //}
-                    //info.rootMotion = positionRootMotion;
-
-                    Matrix4x4 rootMatrix1stFrame = Matrix4x4.identity;
-                    animator.applyRootMotion = true;
-                    animator.Play("TestState", 0);
-                    //                 animator.StartRecording(bakeFrames);
-                    //                 for (int i = 0; i < bakeFrames; i += 1)
-                    //                 {
-                    //                     animator.Update(1.0f / m_fps);
-                    //                 }
-                    //                 animator.StopRecording();
-                    // 
-                    //                 animator.StartPlayback();
-                    //                 animator.playbackTime = 0;
-                    //AnimationInstancing script = m_prefab.GetComponent<AnimationInstancing>();
-                    for (int i = 0; i < bakeFrames; i += 1)
-                    {
-                        //float bakeDelta = Mathf.Clamp01(((float)i / bakeFrames));
-                        //float animationTime = bakeDelta * animClip.length;
-                        //float normalizedTime = animationTime / animClip.length;
-
-                        //UnityEditor.Animations.AnimatorController ac = animator.runtimeAnimatorController;
-                        //UnityEditorInternal.StateMachine sm = ac.GetLayerStateMachine(0);
-
-
-                        //AnimatorStateInfo nameInfo = animator.GetCurrentAnimatorStateInfo(0);
-
-                        //                     if (lastFrameTime == 0)
-                        //                     {
-                        //                         float nextBakeDelta = Mathf.Clamp01(((float)(i + 1) / bakeFrames));
-                        //                         float nextAnimationTime = nextBakeDelta * animClip.length;
-                        //                         lastFrameTime = animationTime - nextAnimationTime;
-                        //                     }
-                        //                     animator.Update(animationTime - lastFrameTime);
-                        //                     lastFrameTime = animationTime;
-
-                        animator.Update(1.0f / bakeFrames);
-
-                        //animClip.SampleAnimation(obj, animationTime);
-
-                        //if (i == 0)
-                        //{
-                        //    rootMatrix1stFrame = boneTransform[0].localToWorldMatrix;
-                        //}
-                        for (int j = 0; j != meshRender.Length; ++j)
-                        {
-                            GenerateBoneMatrix(meshRender[j].name.GetHashCode(),
-                                                    aniName,
-                                                    i,
-                                                    rootMatrix1stFrame,
-                                                    info.rootMotion);
-                        }
-                    }
-
-                    aniInfo.Add(info);
-                    frames += bakeFrames;
-                    SetupAnimationTexture(aniInfo);
-                }
-                //AnimationInstancingMgr.Instance.ExportBoneTexture(m_prefab.name);
-                SaveAnimationInfo(generatedPrefab.name);
-
-                DestroyImmediate(obj);
-            }
-        }
-
-
         void BakeWithAnimator()
         {
             if (generatedPrefab != null)
@@ -618,10 +493,13 @@ namespace AniPlayable.InstanceAnimation
 
         private void SaveAnimationInfo(string name)
         {
-            string folderName = "AnimationTexture";
+            string folderName = "Resources/AnimationTexture";
             string path = Application.dataPath + "/" + folderName + "/";
             if (!Directory.Exists(path))
-                AssetDatabase.CreateFolder("Assets", folderName);
+            {
+                Directory.CreateDirectory(path);
+            }
+                //AssetDatabase.CreateFolder("Assets/Resources", folderName);
             FileStream file = File.Open(path + name + ".bytes", FileMode.Create);
             BinaryWriter writer = new BinaryWriter(file);
             writer.Write(aniInfo.Count);

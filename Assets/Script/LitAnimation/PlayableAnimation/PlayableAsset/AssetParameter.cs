@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.Animations;
 namespace AniPlayable
 {
     [CreateAssetMenu(fileName = "AssetParameter", menuName = "PlayableAnimator/Parameter", order = 0)]

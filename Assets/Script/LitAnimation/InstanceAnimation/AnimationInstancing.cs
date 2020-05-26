@@ -7,9 +7,18 @@ namespace AniPlayable.InstanceAnimation
 {
     public class AnimationInstancing : MonoBehaviour
     {
+        public class LodInfo
+        {
+            public int lodLevel;
+            public SkinnedMeshRenderer[] skinnedMeshRenderer;
+            public MeshRenderer[] meshRenderer;
+            public MeshFilter[] meshFilter;
+            public VertexCache[] vertexCacheList;
+            public MaterialBlock[] materialBlockList;
+        }
         private Animator animator = null;
-        [NonSerialized] public Transform worldTransform;
-        //public GameObject prefab { get; set; }
+
+        #region serialized field
         public GameObject prototype;
         public BoundingSphere boundingSpere;
         public bool visible { get; set; }
@@ -17,7 +26,15 @@ namespace AniPlayable.InstanceAnimation
         public float playSpeed = 1.0f;
         public UnityEngine.Rendering.ShadowCastingMode shadowCastingMode;
         public bool receiveShadow;
+        public bool applyRootMotion = false;
+        public bool autoPlay = false;
+        public string defaultState = "";
+        [Range(1, 4)]
+        public int bonePerVertex = 4;
+        #endregion
 
+        #region runtime
+        [NonSerialized] public Transform worldTransform;
         [NonSerialized] public int layer;
         float speedParameter = 1.0f, cacheParameter = 1.0f;
         WrapMode wrapMode;
@@ -28,10 +45,6 @@ namespace AniPlayable.InstanceAnimation
         }
         public bool IsLoop() { return Mode == WrapMode.Loop; }
         public bool IsPause() { return speedParameter == 0.0f; }
-
-        public bool applyRootMotion = false;
-        [Range(1, 4)]
-        public int bonePerVertex = 4;
 
         [NonSerialized] public float curFrame;
 
@@ -54,15 +67,7 @@ namespace AniPlayable.InstanceAnimation
         private ComparerHash comparer;
         private AnimationInfo searchInfo;
         private AnimationEvent aniEvent = null;
-        public class LodInfo
-        {
-            public int lodLevel;
-            public SkinnedMeshRenderer[] skinnedMeshRenderer;
-            public MeshRenderer[] meshRenderer;
-            public MeshFilter[] meshFilter;
-            public VertexCache[] vertexCacheList;
-            public MaterialBlock[] materialBlockList;
-        }
+
         [NonSerialized]
         public LodInfo[] lodInfo;
         private float lodCalculateFrequency = 0.5f;
@@ -73,6 +78,8 @@ namespace AniPlayable.InstanceAnimation
         private bool isMeshRender = false;
         [NonSerialized]
         private List<AnimationInstancing> listAttachment;
+        #endregion
+
         private UpdateObject updateObject;
 
         #region Init Method
@@ -86,13 +93,18 @@ namespace AniPlayable.InstanceAnimation
         {
             if (m_IsInitialized) return;
             Initialize();
+            if(autoPlay)
+            {
+                PlayAnimation(1);
+            }
+            
         }
 
         private void Initialize()
         {
             if (m_IsInitialized) return;
 
-             if (!AnimationInstancingMgr.Instance.UseInstancing)
+            if (!AnimationInstancingMgr.Instance.UseInstancing)
             {
                 gameObject.SetActive(false);
                 return;
@@ -107,7 +119,7 @@ namespace AniPlayable.InstanceAnimation
             switch (QualitySettings.skinWeights)
             {
                 case SkinWeights.TwoBones:
-                    bonePerVertex = bonePerVertex > 2?2: bonePerVertex;
+                    bonePerVertex = bonePerVertex > 2 ? 2 : bonePerVertex;
                     break;
                 case SkinWeights.OneBone:
                     bonePerVertex = 1;
@@ -238,18 +250,18 @@ namespace AniPlayable.InstanceAnimation
 
         public bool InitializeAnimation()
         {
-			if(prototype == null) 
-			{
-				Debug.LogError("The prototype is NULL. Please select the prototype first.");
-			}
-			Debug.Assert(prototype != null);
-			GameObject thisPrefab = prototype;
+            if (prototype == null)
+            {
+                Debug.LogError("The prototype is NULL. Please select the prototype first.");
+            }
+            Debug.Assert(prototype != null);
+            GameObject thisPrefab = prototype;
             isMeshRender = false;
             if (lodInfo[0].skinnedMeshRenderer.Length == 0)
             {
                 // This is only a MeshRenderer, it has no animations.
                 isMeshRender = true;
-				AnimationInstancingMgr.Instance.AddMeshVertex(prototype.name,
+                AnimationInstancingMgr.Instance.AddMeshVertex(prototype.name,
                     lodInfo,
                     null,
                     null,
@@ -257,7 +269,7 @@ namespace AniPlayable.InstanceAnimation
                 return true;
             }
 
-			AnimationManager.InstanceAnimationInfo info = AnimationManager.Instance.FindAnimationInfo(prototype, this);
+            AnimationManager.InstanceAnimationInfo info = AnimationManager.Instance.FindAnimationInfo(prototype, this);
             if (info != null)
             {
                 aniInfo = info.listAniInfo;
@@ -280,7 +292,7 @@ namespace AniPlayable.InstanceAnimation
             if (extraBoneInfo != null)
             {
                 List<Transform> list = new List<Transform>();
-                list.AddRange(bones);                
+                list.AddRange(bones);
                 Transform[] transforms = gameObject.GetComponentsInChildren<Transform>();
                 for (int i = 0; i != extraBoneInfo.extraBone.Length; ++i)
                 {
@@ -295,9 +307,9 @@ namespace AniPlayable.InstanceAnimation
                 }
                 allTransforms = list.ToArray();
             }
-            
 
-			AnimationInstancingMgr.Instance.AddMeshVertex(prototype.name,
+
+            AnimationInstancingMgr.Instance.AddMeshVertex(prototype.name,
                 lodInfo,
                 allTransforms,
                 bindPose,
@@ -314,9 +326,7 @@ namespace AniPlayable.InstanceAnimation
             }
 
             Destroy(GetComponent<Animator>());
-            //Destroy(GetComponentInChildren<SkinnedMeshRenderer>());
 
-            PlayAnimation(0);
         }
 
         private void CalcBoundingSphere()
@@ -476,36 +486,36 @@ namespace AniPlayable.InstanceAnimation
             switch (wrapMode)
             {
                 case WrapMode.Loop:
-                {
-                    if (curFrame < 0f)
-                        curFrame += (totalFrame - 1);
-                    else if (curFrame > totalFrame - 1)
-                        curFrame -= (totalFrame - 1);
-                    break;
-                }
+                    {
+                        if (curFrame < 0f)
+                            curFrame += (totalFrame - 1);
+                        else if (curFrame > totalFrame - 1)
+                            curFrame -= (totalFrame - 1);
+                        break;
+                    }
                 case WrapMode.PingPong:
-                {
-                    if (curFrame < 0f)
                     {
-                        speedParameter = Mathf.Abs(speedParameter);
-                        curFrame = Mathf.Abs(curFrame);
+                        if (curFrame < 0f)
+                        {
+                            speedParameter = Mathf.Abs(speedParameter);
+                            curFrame = Mathf.Abs(curFrame);
+                        }
+                        else if (curFrame > totalFrame - 1)
+                        {
+                            speedParameter = -Mathf.Abs(speedParameter);
+                            curFrame = 2 * (totalFrame - 1) - curFrame;
+                        }
+                        break;
                     }
-                    else if (curFrame > totalFrame - 1)
-                    {
-                        speedParameter = -Mathf.Abs(speedParameter);
-                        curFrame = 2 * (totalFrame - 1) - curFrame;
-                    }
-                    break;
-                }
                 case WrapMode.Default:
                 case WrapMode.Once:
-                {
-                    if (curFrame < 0f || curFrame > totalFrame - 1.0f)
                     {
-                        Pause();
+                        if (curFrame < 0f || curFrame > totalFrame - 1.0f)
+                        {
+                            Pause();
+                        }
+                        break;
                     }
-                    break;
-                }
             }
 
             curFrame = Mathf.Clamp(curFrame, 0f, totalFrame - 1);
@@ -546,7 +556,7 @@ namespace AniPlayable.InstanceAnimation
             if (aniEvent == null)
             {
                 float time = curFrame / info.fps;
-                for (int i = eventIndex >= 0? eventIndex: 0; i < info.eventList.Count; ++i)
+                for (int i = eventIndex >= 0 ? eventIndex : 0; i < info.eventList.Count; ++i)
                 {
                     if (info.eventList[i].time > time)
                     {
@@ -603,14 +613,14 @@ namespace AniPlayable.InstanceAnimation
             attachment.parentInstance = this;
             VertexCache parentCache = AnimationInstancingMgr.Instance.FindVertexCache(lodInfo[0].skinnedMeshRenderer[0].name.GetHashCode());
             listAttachment.Add(attachment);
-            
+
             int nameCode = boneName.GetHashCode();
-            nameCode += attachment.lodInfo[0].meshRenderer.Length > 0? attachment.lodInfo[0].meshRenderer[0].name.GetHashCode(): 0;
+            nameCode += attachment.lodInfo[0].meshRenderer.Length > 0 ? attachment.lodInfo[0].meshRenderer[0].name.GetHashCode() : 0;
             if (attachment.lodInfo[0].meshRenderer.Length == 0)
             {
                 //todo, to support the attachment that has skinnedMeshRenderer;
                 int skinnedMeshRenderCount = attachment.lodInfo[0].skinnedMeshRenderer.Length;
-                nameCode += skinnedMeshRenderCount > 0? attachment.lodInfo[0].skinnedMeshRenderer[0].name.GetHashCode(): 0;
+                nameCode += skinnedMeshRenderCount > 0 ? attachment.lodInfo[0].skinnedMeshRenderer[0].name.GetHashCode() : 0;
             }
             VertexCache cache = AnimationInstancingMgr.Instance.FindVertexCache(nameCode);
             // if we can reuse the VertexCache, we don't need to create one
@@ -620,7 +630,7 @@ namespace AniPlayable.InstanceAnimation
                 return;
             }
 
-			AnimationInstancingMgr.Instance.AddMeshVertex(attachment.prototype.name,
+            AnimationInstancingMgr.Instance.AddMeshVertex(attachment.prototype.name,
                         attachment.lodInfo,
                         null,
                         null,
@@ -659,7 +669,7 @@ namespace AniPlayable.InstanceAnimation
 
         public int GetAnimationCount()
         {
-            return aniInfo != null? aniInfo.Count: 0;
+            return aniInfo != null ? aniInfo.Count : 0;
         }
 
         private void RefreshAttachmentAnimation(int index)

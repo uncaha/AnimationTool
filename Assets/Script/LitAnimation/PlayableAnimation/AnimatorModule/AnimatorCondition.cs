@@ -1,14 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.Animations;
 namespace AniPlayable.Module
 {
     public class AnimatorCondition: AnimatorModule
     {
         public int Index { get; private set; }
 
-        public AnimatorConditionMode mode;
+        public AssetCondition.AnimatorConditionMode mode;
         public float threshold;
         protected AssetCondition.Condition conditionData;
         protected AnimatorParameter parameterData;
@@ -50,11 +49,11 @@ namespace AniPlayable.Module
         }
         System.Func<bool> GetConditionDelgate_Bool()
         {
-            if(mode == AnimatorConditionMode.If)
+            if(mode == AssetCondition.AnimatorConditionMode.If)
             {
                 return Check_If;
             }
-            else if(mode == AnimatorConditionMode.IfNot)
+            else if(mode == AssetCondition.AnimatorConditionMode.IfNot)
             {
                 return Check_IfNot;
             }
@@ -66,13 +65,13 @@ namespace AniPlayable.Module
         {
             switch (mode)
             {
-                case AnimatorConditionMode.Greater:
+                case AssetCondition.AnimatorConditionMode.Greater:
                     return Check_GreaterInt;
-                case AnimatorConditionMode.Less:
+                case AssetCondition.AnimatorConditionMode.Less:
                     return Check_LessInt;
-                case AnimatorConditionMode.Equals:
+                case AssetCondition.AnimatorConditionMode.Equals:
                     return Check_Equals;
-                case AnimatorConditionMode.NotEqual:
+                case AssetCondition.AnimatorConditionMode.NotEqual:
                     return Check_NotEqual;
                 default:
                     return CheckConditionDelgate_Null;
@@ -82,9 +81,9 @@ namespace AniPlayable.Module
         {
             switch (mode)
             {
-                case AnimatorConditionMode.Greater:
+                case AssetCondition.AnimatorConditionMode.Greater:
                     return Check_GreaterFloat;
-                case AnimatorConditionMode.Less:
+                case AssetCondition.AnimatorConditionMode.Less:
                     return Check_LessFloat;
                 default:
                     return CheckConditionDelgate_Null;

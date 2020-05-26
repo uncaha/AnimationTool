@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor.Animations;
 namespace AniPlayable
 {
     [CreateAssetMenu(fileName = "AssetTransitions", menuName = "PlayableAnimator/Transition", order = 0)]
@@ -17,17 +16,17 @@ namespace AniPlayable
             public string destinationStateName;
             public float duration;
             public float offset;
-            public TransitionInterruptionSource interruptionSource;
+            public int interruptionSource;
             public bool orderedInterruption;
             public float exitTime;
             public bool hasExitTime;
             public bool hasFixedDuration;
             public bool canTransitionToSelf;
             public AssetCondition.Condition[] conditions;
-
-            public void CopyData(AnimatorStateTransition pSource)
+#if UNITY_EDITOR
+            public void CopyData(UnityEditor.Animations.AnimatorStateTransition pSource)
             {
-                if(pSource == null) return;
+                if (pSource == null) return;
                 solo = pSource.solo;
                 mute = pSource.mute;
                 isExit = pSource.isExit;
@@ -35,7 +34,7 @@ namespace AniPlayable
                 destinationStateName = pSource.destinationState != null ? pSource.destinationState.name : null;
                 duration = pSource.duration;
                 offset = pSource.offset;
-                interruptionSource = pSource.interruptionSource;
+                interruptionSource = (int)pSource.interruptionSource;
                 orderedInterruption = pSource.orderedInterruption;
                 exitTime = pSource.exitTime;
                 hasExitTime = pSource.hasExitTime;
@@ -51,6 +50,8 @@ namespace AniPlayable
                     conditions[i] = item;
                 }
             }
+#endif
+
         }
         public Transtions data;
     }
