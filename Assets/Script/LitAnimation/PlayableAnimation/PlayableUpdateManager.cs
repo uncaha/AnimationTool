@@ -25,26 +25,18 @@ namespace AniPlayable
             delgate?.Invoke(dt);
         }
     }
-    public class PlayableUpdateManager : MonoBehaviour
+    public class PlayableUpdateManager : SingletonMonoBehaviour<PlayableUpdateManager>
     {
-        static PlayableUpdateManager sInstance = null;
-        static private PlayableUpdateManager Ins
-        {
-            get
-            {
-                if (sInstance == null)
-                {
-                    GameObject tobj = new GameObject("PlayableUpdateManager");
-                    GameObject.DontDestroyOnLoad(tobj);
-                    sInstance = tobj.AddComponent<PlayableUpdateManager>();
-                }
-                return sInstance;
-            }
-        }
 
         List<UpdateObject> lateUpdataList = new List<UpdateObject>();
         List<UpdateObject> fixedUpdataList = new List<UpdateObject>();
         List<UpdateObject> unscaleUpdataList = new List<UpdateObject>();
+
+
+        protected override void InitMgr()
+        {
+            
+        }
 
         static public void Reg(UpdateObject pobj)
         {
@@ -52,13 +44,13 @@ namespace AniPlayable
             switch (pobj.updateType)
             {
                 case AnimatorUpdateMode.Normal:
-                    towner = Ins.lateUpdataList;
+                    towner = Instance.lateUpdataList;
                     break;
                 case AnimatorUpdateMode.AnimatePhysics:
-                    towner = Ins.fixedUpdataList;
+                    towner = Instance.fixedUpdataList;
                     break;
                 case AnimatorUpdateMode.UnscaledTime:
-                    towner = Ins.unscaleUpdataList;
+                    towner = Instance.unscaleUpdataList;
                     break;
                 default:
                     Debug.LogError("erro animatorUpdateode");

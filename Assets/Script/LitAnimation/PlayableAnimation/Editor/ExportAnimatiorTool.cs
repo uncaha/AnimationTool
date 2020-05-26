@@ -10,13 +10,19 @@ namespace AniPlayable
         private string exportPath = "";
         private string selectPath = "";
 
+        static ExportAnimatiorTool sWindow;
         [MenuItem("AnimatorTool/AnimatorToAsset")]
         static void CreateWindow()
         {
-            Rect rect = new Rect(0, 0, 300, 300);
-            ExportAnimatiorTool window = GetWindowWithRect<ExportAnimatiorTool>(rect, true, "ExportAnimatiorTool");
-            Selection.activeObject = null;
-            window.Show();
+            if (sWindow == null)
+            {
+                //Rect rect = new Rect(0, 0, 300, 300);
+                //sWindow = GetWindowWithRect<ExportAnimatiorTool>(rect, true, "ExportAnimatiorTool");
+                //Selection.activeObject = null;
+                sWindow = GetWindow(typeof(ExportAnimatiorTool)) as ExportAnimatiorTool;
+
+            }
+            sWindow.Show();
         }
 
         private void OnGUI()
