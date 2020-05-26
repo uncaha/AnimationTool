@@ -202,8 +202,11 @@ namespace AniPlayable
                                 DisconnectInput(state.index);
                             }
                         }
-
-                        state.UpdateTransitions(deltaTime,this);
+                        if (!state.fading)
+                        {
+                            state.UpdateTransitions(deltaTime,this);
+                        }
+                        
                     }
 
                     totalWeight += state.weight;

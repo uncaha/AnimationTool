@@ -10,9 +10,9 @@ namespace AniPlayable
         public bool IsDestroyed { get { return target == null; } }
         public bool IsEnable {get{return target!= null && target.enabled && target.gameObject.activeInHierarchy;}}
         System.Action<float> delgate;
-        PlayableAnimator target;
+        MonoBehaviour target;
 
-        public UpdateObject(PlayableAnimator tar, System.Action<float> pDelgate, AnimatorUpdateMode pType = AnimatorUpdateMode.Normal)
+        public UpdateObject(MonoBehaviour tar, System.Action<float> pDelgate, AnimatorUpdateMode pType = AnimatorUpdateMode.Normal)
         {
             target = tar;
             Key = target.gameObject.ToString();
