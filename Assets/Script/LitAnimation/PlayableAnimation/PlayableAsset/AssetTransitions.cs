@@ -64,7 +64,7 @@ namespace AniPlayable
                 {
                     for (int i = 0; i < conditions.Length; i++)
                     {
-                        AssetCondition.Condition item = new AssetCondition.Condition();
+                        AssetCondition.Condition item = conditions[i];
                         item.WriteToFile(pWriter);
                     }
                 }

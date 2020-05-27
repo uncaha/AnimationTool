@@ -745,5 +745,37 @@ namespace AniPlayable.InstanceAnimation
                 }
             }
         }
+
+        #region params
+          public void SetBool(string pKey, bool pValue)
+        {
+            Params.SetBool(pKey, pValue);
+        }
+
+        public void SetInt(string pKey, int pValue)
+        {
+            Params.SetInt(pKey,pValue);
+        }
+
+        public void SetFloat(string pKey, float pValue)
+        {
+            Params.SetFloat(pKey,pValue);
+        }
+
+        public bool GetBool(string pKey)
+        {
+            return Params.GetBool(pKey);
+        }
+
+        public int GetInt(string pKey)
+        {
+            return Params.GetInt(pKey);
+        }
+
+        public float GetFloat(string pKey)
+        {
+            return Params.GetFloat(pKey);
+        }
+        #endregion
     }
 }

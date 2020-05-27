@@ -4,7 +4,7 @@ using UnityEngine;
 using AniPlayable;
 public class testPlay : MonoBehaviour
 {
-    public PlayableAnimator animator; 
+    public AniPlayable.InstanceAnimation.AnimationInstancing animator; 
     // Start is called before the first frame update
     void Start()
     {
@@ -18,30 +18,31 @@ public class testPlay : MonoBehaviour
     }
 
     private void OnGUI() {
-        if(GUI.Button(new Rect(0,100,100f,30),"add testtrigger"))
+        if(GUI.Button(new Rect(0,100,100f,30),"add key1"))
         {
-            animator.SetBool("testtrigger",true);
+            animator.SetInt("ani1",1);
         }
-        if(GUI.Button(new Rect(0,0,100f,30f),"add test"))
+        if(GUI.Button(new Rect(0,0,100f,30f),"add key2"))
         {
-            animator.SetInt("test",2);
+            animator.SetBool("ani2",true);
         }
-        if(GUI.Button(new Rect(0,50,100f,30),"add testbool"))
+        if(GUI.Button(new Rect(0,50,100f,30),"add key3"))
         {
-             animator.SetBool("testbool",true);
+             animator.SetFloat("ani3",2);
         }
 
-        if(GUI.Button(new Rect(300,100,100f,30),"remove testtrigger"))
+        if(GUI.Button(new Rect(120,100,100f,30),"remove key1"))
         {
-            animator.SetBool("testtrigger",false);
+            animator.SetInt("ani1",0);
         }
-        if(GUI.Button(new Rect(300,0,100f,30f),"remove test"))
+        if(GUI.Button(new Rect(120,0,100f,30f),"remove key2"))
         {
-            animator.SetInt("test",0);
+            animator.SetBool("ani2",false);
         }
-        if(GUI.Button(new Rect(300,50,100f,30),"remove testbool"))
+        if(GUI.Button(new Rect(120,50,100f,30),"remove key3"))
         {
-             animator.SetBool("testbool",false);
+             animator.SetFloat("ani3",0);
         }
+
     }
 }

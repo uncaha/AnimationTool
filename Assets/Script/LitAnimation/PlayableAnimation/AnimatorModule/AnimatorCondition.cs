@@ -112,20 +112,20 @@ namespace AniPlayable.Module
         }
         bool Check_GreaterFloat()
         {
-            return threshold > parameterData.floatValue;
+            return parameterData.floatValue > threshold;
         }
         bool Check_LessFloat()
         {
-            return threshold < parameterData.floatValue;
+            return parameterData.floatValue < threshold;
         }
 
         bool Check_GreaterInt()
         {
-            return threshold > parameterData.intValue;
+            return parameterData.intValue > threshold;
         }
         bool Check_LessInt()
         {
-            return threshold < parameterData.intValue;
+            return parameterData.intValue < threshold;
         }
 
         bool Check_Equals()
