@@ -34,6 +34,7 @@ namespace AniPlayable.InstanceAnimation
         #endregion
 
         #region runtime
+        public PlayableAnimatorParameter Params { get; private set; }
         [NonSerialized] public Transform worldTransform;
         [NonSerialized] public int layer;
         float speedParameter = 1.0f, cacheParameter = 1.0f;
@@ -110,7 +111,7 @@ namespace AniPlayable.InstanceAnimation
                 gameObject.SetActive(false);
                 return;
             }
-
+            Params = new PlayableAnimatorParameter();
             worldTransform = GetComponent<Transform>();
             animator = GetComponent<Animator>();
             boundingSpere = new BoundingSphere(new Vector3(0, 0, 0), 1.0f);
@@ -274,6 +275,7 @@ namespace AniPlayable.InstanceAnimation
             if (info != null)
             {
                 aniInfo = info.listAniInfo;
+                PrepareParams(info.paramList);
                 Prepare(aniInfo, info.extraBoneInfo);
             }
             searchInfo = new AnimationInfo();
@@ -281,12 +283,20 @@ namespace AniPlayable.InstanceAnimation
             return true;
         }
 
-        public void PrepareTransition(AnimationInfo pInfo)
+        private void PrepareParams(List<AssetParameter.Parameter> pPamList)
+        {
+            for (int i = 0; i < pPamList.Count; i++)
+            {
+                Params.AddParameter(pPamList[i]);
+            }
+        }
+
+        private void PrepareTransition(AnimationInfo pInfo)
         {
             for (int i = 0; i < pInfo.transtionList.Count; i++)
             {
                 var item = pInfo.transtionList[i];
-                AnimatorTransition item2 = new AnimatorTransition(null, item, i);
+                AnimatorTransition item2 = new AnimatorTransition(Params, item, i);
                 pInfo.animatorTransitions.Add(item2);
             }
         }

@@ -25,6 +25,26 @@ namespace AniPlayable
                 defaultInt = des.defaultInt;
                 defaultBool = des.defaultBool;
             }
+
+            public void WriteToFile(System.IO.BinaryWriter pWriter)
+            {
+                pWriter.Write(name);
+                pWriter.Write(nameHash);
+                pWriter.Write((int)type);
+                pWriter.Write(defaultFloat);
+                pWriter.Write(defaultInt);
+                pWriter.Write(defaultBool);
+            }
+
+            public void ReadFromFile(System.IO.BinaryReader pReader)
+            {
+                name = pReader.ReadString();
+                nameHash = pReader.ReadInt32();
+                type = (AnimatorControllerParameterType)pReader.ReadInt32();
+                defaultFloat = pReader.ReadSingle();
+                defaultInt = pReader.ReadInt32();
+                defaultBool = pReader.ReadBoolean();
+            }
         }
         public Parameter[] parameters;
     }

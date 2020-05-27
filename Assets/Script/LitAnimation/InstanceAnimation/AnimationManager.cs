@@ -16,6 +16,7 @@ namespace AniPlayable.InstanceAnimation
         // A container to storage all animations info within game object
         public class InstanceAnimationInfo 
         {
+            public List<AssetParameter.Parameter> paramList;
             public List<AnimationInfo> listAniInfo;
             public ExtraBoneInfo extraBoneInfo;
         }
@@ -137,6 +138,7 @@ namespace AniPlayable.InstanceAnimation
             }
             BinaryReader reader = new BinaryReader(new MemoryStream(tdata.bytes));
             InstanceAnimationInfo info = new InstanceAnimationInfo();
+            info.paramList = ReadParameters(reader);
             info.listAniInfo = ReadAnimationInfo(reader);
             info.extraBoneInfo = ReadExtraBoneInfo(reader);
             m_animationInfo.Add(prefab, info);
@@ -144,6 +146,19 @@ namespace AniPlayable.InstanceAnimation
             reader.Close();
             Resources.UnloadAsset(tdata);
             return info;
+        }
+
+        private List<AssetParameter.Parameter> ReadParameters(BinaryReader reader)
+        {
+            List<AssetParameter.Parameter> ret = new List<AssetParameter.Parameter>();
+            int tcount = reader.ReadInt32();
+            for (int i = 0; i < tcount; i++)
+            {
+                AssetParameter.Parameter tpamdata = new AssetParameter.Parameter();
+                tpamdata.ReadFromFile(reader);
+                ret.Add(tpamdata);
+            }
+            return ret;
         }
 
         private List<AnimationInfo> ReadAnimationInfo(BinaryReader reader)

@@ -149,7 +149,7 @@ namespace AniPlayable.InstanceAnimation
                         cacheAnimationEvent.Clear();
                         PrepareBoneTexture(aniInfo);
                         SetupAnimationTexture(aniInfo);
-                        SaveAnimationInfo(generatedPrefab.name);
+                        SaveAnimationInfo(generatedPrefab.name, workingInfo);
                         DestroyImmediate(workingInfo.animator.gameObject);
                         EditorUtility.ClearProgressBar();
                     }
@@ -514,7 +514,7 @@ namespace AniPlayable.InstanceAnimation
         // {
         //     return string.Format("{0}/{1}.asset", "Resources/AnimationTexture", name);
         // }
-        private void SaveAnimationInfo(string name)
+        private void SaveAnimationInfo(string name,AnimationBakeInfo pWorkInfo)
         {
             string folderName = "Resources/AnimationTexture";
             string path = Application.dataPath + "/" + folderName + "/";
@@ -522,9 +522,27 @@ namespace AniPlayable.InstanceAnimation
             {
                 Directory.CreateDirectory(path);
             }
+
+            UnityEditor.Animations.AnimatorController controller = pWorkInfo.animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
                 //AssetDatabase.CreateFolder("Assets/Resources", folderName);
             FileStream file = File.Open(path + name + ".bytes", FileMode.Create);
             BinaryWriter writer = new BinaryWriter(file);
+
+            //存储参数
+            int tpamCount = controller.parameters != null ? controller.parameters.Length : 0;
+            writer.Write(tpamCount);
+            if(controller.parameters != null && controller.parameters.Length > 0)
+            {   
+                AssetParameter.Parameter[] tparms = new AssetParameter.Parameter[tpamCount];
+                for (int i = 0; i < tpamCount; i++)
+                {
+                    AssetParameter.Parameter tpamdata = new AssetParameter.Parameter();
+                    tpamdata.CopyData(controller.parameters[i]);
+                    tpamdata.WriteToFile(writer);
+                }
+            }
+
+            //存储animation State
             writer.Write(aniInfo.Count);
             foreach (var obj in aniInfo)
             {
@@ -569,6 +587,7 @@ namespace AniPlayable.InstanceAnimation
                 }
             }
 
+            //attach
             writer.Write(exposeAttachments);
             if (exposeAttachments)
             {
@@ -585,7 +604,8 @@ namespace AniPlayable.InstanceAnimation
                     }
                 }
             }
-
+            
+            //boneTexture
             Texture2D[] texture = bakedBoneTexture;
             writer.Write(texture.Length);
             writer.Write(textureBlockWidth);
