@@ -132,6 +132,7 @@ half4 skinningShadow(inout appdata_full v)
 
 void vert(inout appdata_full v)
 {
+	UNITY_SETUP_INSTANCE_ID(v);
 #ifdef UNITY_PASS_SHADOWCASTER
 	v.vertex = skinningShadow(v);
 #else
