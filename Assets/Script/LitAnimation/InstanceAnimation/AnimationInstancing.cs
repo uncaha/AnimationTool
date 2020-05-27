@@ -95,7 +95,8 @@ namespace AniPlayable.InstanceAnimation
             Initialize();
             if(autoPlay)
             {
-                PlayAnimation(1);
+                PlayAnimation(2);
+                //Pause();
             }
             
         }
@@ -280,9 +281,25 @@ namespace AniPlayable.InstanceAnimation
             return true;
         }
 
+        public void PrepareTransition(AnimationInfo pInfo)
+        {
+            for (int i = 0; i < pInfo.transtionList.Count; i++)
+            {
+                var item = pInfo.transtionList[i];
+                AnimatorTransition item2 = new AnimatorTransition(null, item, i);
+                pInfo.animatorTransitions.Add(item2);
+            }
+        }
+
         public void Prepare(List<AnimationInfo> infoList, ExtraBoneInfo extraBoneInfo)
         {
             aniInfo = infoList;
+ 
+            foreach (var aniItem in aniInfo)
+            {
+                PrepareTransition(aniItem);
+            }
+
             //extraBoneInfo = extraBoneInfo;
             List<Matrix4x4> bindPose = new List<Matrix4x4>(150);
             // to optimize, MergeBone don't need to call every time
@@ -526,6 +543,34 @@ namespace AniPlayable.InstanceAnimation
                 attachment.transform.rotation = transform.rotation;
             }
             UpdateAnimationEvent();
+            UpdateTranstions();
+        }
+
+        bool transtioning = true;
+        int transtingIndex = 0;
+        void UpdateTranstions()
+        {
+
+            AnimationInfo info = GetCurrentAnimationInfo();
+            if (info == null)
+                return;
+            if (info.animatorTransitions.Count == 0)
+                return;
+            
+            float tprocess = curFrame / info.totalFrame;
+            var transtions = info.animatorTransitions;
+            for (int i = 0; i < transtions.Count; i++)
+            {
+                var ttrans = transtions[i];
+                if (ttrans.CheckCondition())
+                {
+                    if (ttrans.exitTime < tprocess)
+                    {
+                        CrossFade(ttrans.destinationStateName, ttrans.duration);
+                    }
+                }
+
+            }
         }
 
         public void UpdateLod(Vector3 cameraPosition)

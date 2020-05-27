@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using AniPlayable.Module;
 namespace AniPlayable.InstanceAnimation
 {
   public class AnimationManager : SingletonMonoBehaviour<AnimationManager>
@@ -189,6 +190,16 @@ namespace AniPlayable.InstanceAnimation
                     evt.objectParameter = reader.ReadString();
                     info.eventList.Add(evt);
                 }
+
+                int transCount = reader.ReadInt32();
+                info.transtionList = new List<AssetTransitions.Transtions>();
+                for (int j = 0; j < transCount; j++)
+                {
+                    AssetTransitions.Transtions item = new AssetTransitions.Transtions();
+                    item.ReadFromFile(reader);
+                    info.transtionList.Add(item);
+                }
+
                 listInfo.Add(info);
             }
             listInfo.Sort(new ComparerHash());

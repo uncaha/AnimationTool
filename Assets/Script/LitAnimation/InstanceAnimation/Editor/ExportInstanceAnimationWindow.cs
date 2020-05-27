@@ -457,6 +457,18 @@ namespace AniPlayable.InstanceAnimation
                     bake.info.velocity = new Vector3[bake.info.totalFrame];
                     bake.info.angularVelocity = new Vector3[bake.info.totalFrame];
                 }
+
+
+                AnimatorStateTransition[] transs = state.state.transitions;
+                bake.info.transtionList = new List<AssetTransitions.Transtions>();
+                for (int k = 0; k < transs.Length; k++)
+                {
+                    AnimatorStateTransition transdata = transs[k];
+                    AssetTransitions.Transtions ttranstion = new AssetTransitions.Transtions();
+                    ttranstion.CopyData(transdata);
+                    bake.info.transtionList.Add(ttranstion);
+                }
+
                 generateInfo.Add(bake);
                 animationIndex += bake.info.totalFrame;
                 totalFrame += bake.info.totalFrame;
@@ -490,7 +502,18 @@ namespace AniPlayable.InstanceAnimation
             }
         }
 
-
+        // public AnimationInfoAsset CreateAnimationInfoAsset(string name)
+        // {
+        //     AnimationInfoAsset asset = ScriptableObject.CreateInstance<AnimationInfoAsset>();
+        //     asset.name = name;
+        //     AssetDatabase.CreateAsset(asset, GetNewAssetPath(name));
+        //     AssetDatabase.Refresh();
+        //     return asset;
+        // }
+        // private string GetNewAssetPath(string name)
+        // {
+        //     return string.Format("{0}/{1}.asset", "Resources/AnimationTexture", name);
+        // }
         private void SaveAnimationInfo(string name)
         {
             string folderName = "Resources/AnimationTexture";
@@ -537,6 +560,12 @@ namespace AniPlayable.InstanceAnimation
                     writer.Write(evt.stringParameter);
                     writer.Write(evt.time);
                     writer.Write(evt.objectParameter);
+                }
+
+                writer.Write(info.transtionList.Count);
+                foreach (var tran in info.transtionList)
+                {
+                    tran.WriteToFile(writer);
                 }
             }
 

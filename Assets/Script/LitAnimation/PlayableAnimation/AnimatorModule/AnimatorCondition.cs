@@ -12,7 +12,7 @@ namespace AniPlayable.Module
         protected AssetCondition.Condition conditionData;
         protected AnimatorParameter parameterData;
         protected System.Func<bool> conditionDelgate;
-        public AnimatorCondition(PlayableAnimator playableAnimator,AssetCondition.Condition pData, int pIndex)
+        public AnimatorCondition(PlayableAnimatorParameter parms,AssetCondition.Condition pData, int pIndex)
         {
             conditionData = pData;
             Index = pIndex;
@@ -20,7 +20,7 @@ namespace AniPlayable.Module
             mode = conditionData.mode;
             threshold = conditionData.threshold;
 
-            parameterData = playableAnimator.StateController.Params.GetParameter(conditionData.parameter);
+            parameterData = parms.GetParameter(conditionData.parameter);
 
             switch (parameterData.type)
             {

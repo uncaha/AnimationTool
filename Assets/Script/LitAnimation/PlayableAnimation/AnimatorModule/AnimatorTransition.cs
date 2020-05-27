@@ -13,7 +13,7 @@ namespace AniPlayable.Module
         public float duration;
         public float exitTime;
         protected AssetTransitions.Transtions transtion;
-        public AnimatorTransition(PlayableAnimator playableAnimator,AssetTransitions.Transtions pData, int pIndex)
+        public AnimatorTransition(PlayableAnimatorParameter parms,AssetTransitions.Transtions pData, int pIndex)
         {
             transtion = pData;
             Index = pIndex;
@@ -28,7 +28,7 @@ namespace AniPlayable.Module
                 conditions = new AnimatorCondition[transtion.conditions.Length];
                 for (int i = 0; i < conditions.Length; i++)
                 {
-                    conditions[i] = new AnimatorCondition(playableAnimator,transtion.conditions[i],i);
+                    conditions[i] = new AnimatorCondition(parms,transtion.conditions[i],i);
                 }
             }
             

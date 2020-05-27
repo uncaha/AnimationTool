@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using AniPlayable.Module;
 namespace AniPlayable.InstanceAnimation
 {
     public class AnimationEvent
@@ -26,6 +27,8 @@ namespace AniPlayable.InstanceAnimation
         public Vector3[] velocity;
         public Vector3[] angularVelocity;
         public List<AnimationEvent> eventList;
+        public List<AssetTransitions.Transtions> transtionList;
+        public List<AnimatorTransition> animatorTransitions = new List<AnimatorTransition>();
     }
 
     public class ExtraBoneInfo

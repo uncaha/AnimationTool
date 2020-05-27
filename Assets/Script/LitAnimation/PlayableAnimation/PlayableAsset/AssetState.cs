@@ -27,7 +27,7 @@ namespace AniPlayable
                     tinfo.transtions = ttransObj;
                     for (int i = 0; i < ttransObj.Length; i++)
                     {
-                        ttransObj[i] = new AnimatorTransition(playableAnimator,transtions[i],i);
+                        ttransObj[i] = new AnimatorTransition(playableAnimator.StateController.Params,transtions[i],i);
                     }
                 }
             }

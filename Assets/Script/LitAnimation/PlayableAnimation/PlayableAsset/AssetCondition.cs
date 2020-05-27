@@ -28,7 +28,20 @@ namespace AniPlayable
                 parameter = pSource.parameter;
                 threshold = pSource.threshold;
             }
+
+            public void WriteToFile(System.IO.BinaryWriter pWriter)
+            {
+                pWriter.Write((int)mode);
+                pWriter.Write(parameter);
+                pWriter.Write(threshold);
+            }
 #endif
+            public void ReadFromFile(System.IO.BinaryReader pReader)
+            {
+                mode = (AnimatorConditionMode)pReader.ReadInt32();
+                parameter = pReader.ReadString();
+                threshold = pReader.ReadSingle();
+            }
         }
 
         public Condition condition;
