@@ -32,7 +32,7 @@ namespace AniPlayable.InstanceAnimation
             for (int k = 0; k < transs.Length; k++)
             {
                 AnimatorStateTransition transdata = transs[k];
-                AssetTransitions.Transtions ttranstion = new AssetTransitions.Transtions();
+                AssetTransitions.Transtions ttranstion = new AssetTransitions.Transtions(){ownerMachineIndex = machineIndex};
                 ttranstion.CopyData(transdata);
                 transtionList.Add(ttranstion);
             }

@@ -16,6 +16,7 @@ namespace AniPlayable
         [System.Serializable]
         public class Transtions
         {
+            public int ownerMachineIndex = 0;
             DestinationType destinationType = DestinationType.none;
             public string destinationName = "";
             public float duration;
@@ -51,6 +52,7 @@ namespace AniPlayable
 
             public void WriteToFile(System.IO.BinaryWriter pWriter)
             {
+                pWriter.Write(ownerMachineIndex);
                 pWriter.Write((int)destinationType);
                 pWriter.Write(destinationName);
                 pWriter.Write(duration);
@@ -71,6 +73,7 @@ namespace AniPlayable
 #endif
             public void ReadFromFile(System.IO.BinaryReader pReader)
             {
+                ownerMachineIndex = pReader.ReadInt32();
                 destinationType = (DestinationType)pReader.ReadInt32();
                 destinationName = pReader.ReadString();
                 duration = pReader.ReadSingle();

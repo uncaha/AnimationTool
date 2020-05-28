@@ -5,9 +5,13 @@ namespace AniPlayable.InstanceAnimation
 {
     public class RuntimeAnimatorLayer : Node
     {
+        public string name { get { return layerInfo.name; } }
+        public int index { get { return layerInfo.index; } }
         public RuntimeAnimatorMachine defaultStateMachine {get ; private set;}
-        public AnimationLayerInfo layerInfo { get; protected set; }
+        
+        AnimationLayerInfo layerInfo;
         private List<RuntimeAnimatorMachine> machineList = new List<RuntimeAnimatorMachine>();
+        private Dictionary<int,RuntimeAnimatorMachine> machineDic = new Dictionary<int,RuntimeAnimatorMachine>();
         public RuntimeAnimatorLayer(AnimationLayerInfo pInfo)
         {
             layerInfo = pInfo;

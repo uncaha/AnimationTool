@@ -6,8 +6,13 @@ namespace AniPlayable.InstanceAnimation
     
     public class RuntimeAnimatorMachine: Node
     {
-        public AnimationStateMachineInfo machineInfo { get; protected set;}
+        public int layerIndex { get { return machineInfo.layerIndex; } }
+        public int index { get { return machineInfo.index; } }
+        public string defaultName { get { return machineInfo.defaultName; } }
+        public int defaultHashName { get { return machineInfo.defaultHashName; } }
         public RuntimeAnimatorState defaultState { get; protected set;}
+        
+        AnimationStateMachineInfo machineInfo;
         private Dictionary<int,RuntimeAnimatorState> stateList = new Dictionary<int,RuntimeAnimatorState>();
         public RuntimeAnimatorMachine(AnimationStateMachineInfo pInfo)
         {

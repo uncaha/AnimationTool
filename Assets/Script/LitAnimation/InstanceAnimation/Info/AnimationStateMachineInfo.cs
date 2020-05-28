@@ -34,7 +34,7 @@ namespace AniPlayable.InstanceAnimation
             layerIndex = pReader.ReadInt32();
             index = pReader.ReadInt32();
             defaultName = pReader.ReadString();
-            defaultHashName = defaultName.GetHashCode();
+            
             int tlen = pReader.ReadInt32();
             for (int i = 0; i < tlen; i++)
             {
@@ -46,6 +46,8 @@ namespace AniPlayable.InstanceAnimation
                 }
                 stateInfos.Add(tstate);
             }
+
+            defaultHashName = defaultName.GetHashCode();
         }
     }
 }
