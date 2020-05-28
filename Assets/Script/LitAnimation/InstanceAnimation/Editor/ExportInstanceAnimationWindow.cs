@@ -47,6 +47,8 @@ namespace AniPlayable.InstanceAnimation
             public int layer;
             public AnimationInfo info;
         }
+        private List<AnimationLayerInfo> layerInfos;
+
         private Dictionary<int, VertexCache> generateVertexCachePool;
         private Dictionary<int, ArrayList> generateMatrixDataPool;
         private GenerateOjbectInfo[] generateObjectData;
@@ -55,7 +57,6 @@ namespace AniPlayable.InstanceAnimation
         private int generateCount;
         private AnimationBakeInfo workingInfo;
         private int totalFrame;
-        private Dictionary<UnityEditor.Animations.AnimatorState, UnityEditor.Animations.AnimatorStateTransition[]> cacheTransition;
         private Dictionary<AnimationClip, UnityEngine.AnimationEvent[]> cacheAnimationEvent;
         private Transform[] boneTransform;
         // to cache the bone count of object in bake flow
@@ -72,8 +73,9 @@ namespace AniPlayable.InstanceAnimation
 
         private void OnEnable()
         {
+            layerInfos = new List<AnimationLayerInfo>();
             generateInfo = new List<AnimationBakeInfo>();
-            cacheTransition = new Dictionary<UnityEditor.Animations.AnimatorState, UnityEditor.Animations.AnimatorStateTransition[]>();
+
             cacheAnimationEvent = new Dictionary<AnimationClip, UnityEngine.AnimationEvent[]>();
             generatedPrefab = null;
             generateVertexCachePool = new Dictionary<int,VertexCache>();
@@ -131,27 +133,34 @@ namespace AniPlayable.InstanceAnimation
                 //Debug.Log("The length is" + workingInfo.animator.velocity.magnitude);
                 workingInfo.info.velocity[workingInfo.workingFrame] = workingInfo.animator.velocity;
                 workingInfo.info.angularVelocity[workingInfo.workingFrame] = workingInfo.animator.angularVelocity * Mathf.Rad2Deg;
-
+                
+                EditorUtility.DisplayProgressBar("Brake Animation" + workingInfo.info.animationName, string.Format("curFrame {0}", workingInfo.workingFrame),(float)workingInfo.workingFrame / workingInfo.info.totalFrame);
+                
                 if (++workingInfo.workingFrame >= workingInfo.info.totalFrame)
                 {
                     aniInfo.Add(workingInfo.info);
                     if (generateInfo.Count == 0)
                     {
-                        foreach (var obj in cacheTransition)
-                        {
-                            obj.Key.transitions = obj.Value;
-                        }
-                        cacheTransition.Clear();
+
                         foreach (var obj in cacheAnimationEvent)
                         {
                             UnityEditor.AnimationUtility.SetAnimationEvents(obj.Key, obj.Value);
                         }
                         cacheAnimationEvent.Clear();
-                        PrepareBoneTexture(aniInfo);
-                        SetupAnimationTexture(aniInfo);
-                        SaveAnimationInfo(generatedPrefab.name, workingInfo);
+                        try
+                        {
+                            PrepareBoneTexture(aniInfo);
+                            SetupAnimationTexture(aniInfo);
+                            SaveAnimationInfo(generatedPrefab.name, workingInfo);
+                        }
+                        catch (System.Exception erro)
+                        {
+                            Debug.LogError(erro);
+                        }
+                        
                         DestroyImmediate(workingInfo.animator.gameObject);
                         EditorUtility.ClearProgressBar();
+                        AssetDatabase.Refresh();
                     }
 
                     if (workingInfo.animator != null)
@@ -165,7 +174,7 @@ namespace AniPlayable.InstanceAnimation
 
                 float deltaTime = workingInfo.length / (workingInfo.info.totalFrame - 1);
                 workingInfo.animator.Update(deltaTime);
-
+                
             }
         }
 
@@ -390,35 +399,53 @@ namespace AniPlayable.InstanceAnimation
                 animator.applyRootMotion = true;
                 totalFrame = 0;
 
-                UnityEditor.Animations.AnimatorController controller = animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
-                Debug.Assert(controller.layers.Length > 0);
-                cacheTransition.Clear();
+                //初始化数据
                 cacheAnimationEvent.Clear();
-                UnityEditor.Animations.AnimatorControllerLayer layer = controller.layers[0];
-                AnalyzeStateMachine(layer.stateMachine, animator, meshRender, 0, aniFps, 0);
+                layerInfos.Clear();
+
+                AnimationInstancing instance = generatedPrefab.GetComponent<AnimationInstancing>();
+                if (instance == null)
+                {
+                    Debug.LogError("You should select a prefab with AnimationInstancing component.");
+                    return;
+                }
+                instance.prototype = generatedPrefab;
+
+                var controller = animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
+                var tlayers = controller.layers;
+                for (int i = 0; i < tlayers.Length; i++)
+                {
+                    var layer = tlayers[i];
+                    var tinfo = new AnimationLayerInfo(){name = layer.name,index = i};
+                    AnalyzeStateMachine(tinfo,layer,layer.stateMachine, animator, meshRender, 0, aniFps, 0);
+                    layerInfos.Add(tinfo);
+                }
+               // UnityEditor.Animations.AnimatorControllerLayer layer = controller.layers[0];
+                //AnalyzeStateMachine(layer.stateMachine, animator, meshRender, 0, aniFps, 0);
                 generateCount = generateInfo.Count;
             }
         }
 
 
-        void AnalyzeStateMachine(UnityEditor.Animations.AnimatorStateMachine stateMachine,
+        void AnalyzeStateMachine(AnimationLayerInfo pLayerInfo,
+            UnityEditor.Animations.AnimatorControllerLayer ownerLayer,
+            UnityEditor.Animations.AnimatorStateMachine stateMachine,
             Animator animator,
             SkinnedMeshRenderer[] meshRender,
             int layer,
             int bakeFPS,
             int animationIndex)
         {
-            AnimationInstancing instance = generatedPrefab.GetComponent<AnimationInstancing>();
-            if (instance == null)
-            {
-                Debug.LogError("You should select a prefab with AnimationInstancing component.");
-                return;
-            }
-            instance.prototype = generatedPrefab;
+            var tmachineInfo = new AnimationStateMachineInfo() { defaultHashName = stateMachine.defaultState.nameHash };
+            pLayerInfo.machines.Add(tmachineInfo);
 
             for (int i = 0; i != stateMachine.states.Length; ++i)
             {
                 ChildAnimatorState state = stateMachine.states[i];
+                var tstateinfo = new AnimationStateInfo();
+                tstateinfo.SetData(state.state);
+                tmachineInfo.stateInfos.Add(tstateinfo);
+
                 AnimationClip clip = state.state.motion as AnimationClip;
                 bool needBake = false;
                 if (clip == null)
@@ -458,17 +485,6 @@ namespace AniPlayable.InstanceAnimation
                     bake.info.angularVelocity = new Vector3[bake.info.totalFrame];
                 }
 
-
-                AnimatorStateTransition[] transs = state.state.transitions;
-                bake.info.transtionList = new List<AssetTransitions.Transtions>();
-                for (int k = 0; k < transs.Length; k++)
-                {
-                    AnimatorStateTransition transdata = transs[k];
-                    AssetTransitions.Transtions ttranstion = new AssetTransitions.Transtions();
-                    ttranstion.CopyData(transdata);
-                    bake.info.transtionList.Add(ttranstion);
-                }
-
                 generateInfo.Add(bake);
                 animationIndex += bake.info.totalFrame;
                 totalFrame += bake.info.totalFrame;
@@ -490,7 +506,7 @@ namespace AniPlayable.InstanceAnimation
                     bake.info.eventList.Add(aniEvent);
                 }
 
-                cacheTransition.Add(state.state, state.state.transitions);
+
                 state.state.transitions = null;
                 cacheAnimationEvent.Add(clip, clip.events);
                 UnityEngine.AnimationEvent[] tempEvent = new UnityEngine.AnimationEvent[0];
@@ -498,7 +514,7 @@ namespace AniPlayable.InstanceAnimation
             }
             for (int i = 0; i != stateMachine.stateMachines.Length; ++i)
             {
-                AnalyzeStateMachine(stateMachine.stateMachines[i].stateMachine, animator, meshRender, layer, bakeFPS, animationIndex);
+                AnalyzeStateMachine(pLayerInfo,ownerLayer,stateMachine.stateMachines[i].stateMachine, animator, meshRender, layer, bakeFPS, animationIndex);
             }
         }
 
@@ -542,6 +558,12 @@ namespace AniPlayable.InstanceAnimation
                 }
             }
 
+            writer.Write(layerInfos.Count);
+            foreach (var item in layerInfos)
+            {
+                item.WriteToFile(writer);
+            }
+
             //存储animation State
             writer.Write(aniInfo.Count);
             foreach (var obj in aniInfo)
@@ -578,12 +600,6 @@ namespace AniPlayable.InstanceAnimation
                     writer.Write(evt.stringParameter);
                     writer.Write(evt.time);
                     writer.Write(evt.objectParameter);
-                }
-
-                writer.Write(info.transtionList.Count);
-                foreach (var tran in info.transtionList)
-                {
-                    tran.WriteToFile(writer);
                 }
             }
 

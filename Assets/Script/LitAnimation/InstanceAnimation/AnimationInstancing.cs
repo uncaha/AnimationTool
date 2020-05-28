@@ -293,22 +293,17 @@ namespace AniPlayable.InstanceAnimation
 
         private void PrepareTransition(AnimationInfo pInfo)
         {
-            for (int i = 0; i < pInfo.transtionList.Count; i++)
-            {
-                var item = pInfo.transtionList[i];
-                AnimatorTransition item2 = new AnimatorTransition(Params, item, i);
-                pInfo.animatorTransitions.Add(item2);
-            }
+            // for (int i = 0; i < pInfo.transtionList.Count; i++)
+            // {
+            //     var item = pInfo.transtionList[i];
+            //     AnimatorTransition item2 = new AnimatorTransition(Params, item, i);
+            //     pInfo.animatorTransitions.Add(item2);
+            // }
         }
 
         public void Prepare(List<AnimationInfo> infoList, ExtraBoneInfo extraBoneInfo)
         {
             aniInfo = infoList;
- 
-            foreach (var aniItem in aniInfo)
-            {
-                PrepareTransition(aniItem);
-            }
 
             //extraBoneInfo = extraBoneInfo;
             List<Matrix4x4> bindPose = new List<Matrix4x4>(150);
@@ -561,26 +556,26 @@ namespace AniPlayable.InstanceAnimation
         void UpdateTranstions()
         {
 
-            AnimationInfo info = GetCurrentAnimationInfo();
-            if (info == null)
-                return;
-            if (info.animatorTransitions.Count == 0)
-                return;
+            // AnimationInfo info = GetCurrentAnimationInfo();
+            // if (info == null)
+            //     return;
+            // if (info.animatorTransitions.Count == 0)
+            //     return;
             
-            float tprocess = curFrame / info.totalFrame;
-            var transtions = info.animatorTransitions;
-            for (int i = 0; i < transtions.Count; i++)
-            {
-                var ttrans = transtions[i];
-                if (ttrans.CheckCondition())
-                {
-                    if (ttrans.exitTime < tprocess)
-                    {
-                        CrossFade(ttrans.destinationStateName, ttrans.duration);
-                    }
-                }
+            // float tprocess = curFrame / info.totalFrame;
+            // var transtions = info.animatorTransitions;
+            // for (int i = 0; i < transtions.Count; i++)
+            // {
+            //     var ttrans = transtions[i];
+            //     if (ttrans.CheckCondition())
+            //     {
+            //         if (ttrans.exitTime < tprocess)
+            //         {
+            //             CrossFade(ttrans.destinationStateName, ttrans.duration);
+            //         }
+            //     }
 
-            }
+            // }
         }
 
         public void UpdateLod(Vector3 cameraPosition)

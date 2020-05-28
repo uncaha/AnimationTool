@@ -17,6 +17,7 @@ namespace AniPlayable.InstanceAnimation
         public class InstanceAnimationInfo 
         {
             public List<AssetParameter.Parameter> paramList;
+            public List<AnimationLayerInfo> layerList;
             public List<AnimationInfo> listAniInfo;
             public ExtraBoneInfo extraBoneInfo;
         }
@@ -139,6 +140,7 @@ namespace AniPlayable.InstanceAnimation
             BinaryReader reader = new BinaryReader(new MemoryStream(tdata.bytes));
             InstanceAnimationInfo info = new InstanceAnimationInfo();
             info.paramList = ReadParameters(reader);
+            info.layerList = ReadLayers(reader);
             info.listAniInfo = ReadAnimationInfo(reader);
             info.extraBoneInfo = ReadExtraBoneInfo(reader);
             m_animationInfo.Add(prefab, info);
@@ -157,6 +159,20 @@ namespace AniPlayable.InstanceAnimation
                 AssetParameter.Parameter tpamdata = new AssetParameter.Parameter();
                 tpamdata.ReadFromFile(reader);
                 ret.Add(tpamdata);
+            }
+            return ret;
+        }
+
+        private List<AnimationLayerInfo> ReadLayers(BinaryReader reader)
+        {
+            List<AnimationLayerInfo> ret = new List<AnimationLayerInfo>();
+            int tcount = reader.ReadInt32();
+  
+            for (int j = 0; j < tcount; j++)
+            {
+                var item = new AnimationLayerInfo();
+                item.ReadFromFile(reader);
+                ret.Add(item);
             }
             return ret;
         }
@@ -204,15 +220,6 @@ namespace AniPlayable.InstanceAnimation
                     evt.time = reader.ReadSingle();
                     evt.objectParameter = reader.ReadString();
                     info.eventList.Add(evt);
-                }
-
-                int transCount = reader.ReadInt32();
-                info.transtionList = new List<AssetTransitions.Transtions>();
-                for (int j = 0; j < transCount; j++)
-                {
-                    AssetTransitions.Transtions item = new AssetTransitions.Transtions();
-                    item.ReadFromFile(reader);
-                    info.transtionList.Add(item);
                 }
 
                 listInfo.Add(info);
