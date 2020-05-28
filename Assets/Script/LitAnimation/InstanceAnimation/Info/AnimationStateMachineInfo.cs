@@ -5,6 +5,8 @@ namespace AniPlayable.InstanceAnimation
 {
     public class AnimationStateMachineInfo
     {
+        public int layerIndex;
+        public int index;
         public AnimationStateInfo defaultState;
         public int defaultHashName;
         public List<AnimationStateInfo> stateInfos = new List<AnimationStateInfo>();
@@ -12,6 +14,8 @@ namespace AniPlayable.InstanceAnimation
 #if UNITY_EDITOR
         public void WriteToFile(System.IO.BinaryWriter pWriter)
         {
+            pWriter.Write(layerIndex);
+            pWriter.Write(index);
             pWriter.Write(defaultHashName);
 
             pWriter.Write(stateInfos.Count);
@@ -26,6 +30,8 @@ namespace AniPlayable.InstanceAnimation
 
         public void ReadFromFile(System.IO.BinaryReader pReader)
         {
+            layerIndex = pReader.ReadInt32();
+            index = pReader.ReadInt32();
             defaultHashName = pReader.ReadInt32();
 
             int tlen = pReader.ReadInt32();

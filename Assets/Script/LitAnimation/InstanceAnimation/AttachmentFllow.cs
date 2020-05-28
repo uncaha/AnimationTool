@@ -28,7 +28,7 @@ namespace AniPlayable.InstanceAnimation
             if (instance)
             {
                 int count = instance.GetAnimationCount();
-                instance.PlayAnimation(Random.Range(0, count));
+                //instance.PlayAnimation(Random.Range(0, count));
                 AnimationInstancing attachmentScript = attachment.GetComponent<AnimationInstancing>();
                 instance.Attach("ik_hand_r", attachmentScript);
             }

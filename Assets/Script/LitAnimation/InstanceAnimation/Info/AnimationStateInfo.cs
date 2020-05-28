@@ -9,9 +9,12 @@ namespace AniPlayable.InstanceAnimation
 {
     public class AnimationStateInfo
     {
+        public int machineIndex = 0;
+        public int index = 0;
         public string name;
         public int hashName;
         public float speed = 1;
+        public string motionName;
         public List<AssetTransitions.Transtions> transtionList = new List<AssetTransitions.Transtions>();
 #if UNITY_EDITOR
         public void SetData(UnityEditor.Animations.AnimatorState pState)
@@ -19,6 +22,9 @@ namespace AniPlayable.InstanceAnimation
             name = pState.name;
             hashName = pState.nameHash;
             speed = pState.speed;
+
+            AnimationClip clip = pState.motion as AnimationClip;
+            motionName = clip != null ? clip.name: "";
 
             transtionList.Clear();
             AnimatorStateTransition[] transs = pState.transitions;
@@ -33,9 +39,12 @@ namespace AniPlayable.InstanceAnimation
 
         public void WriteToFile(System.IO.BinaryWriter pWriter)
         {
+            pWriter.Write(machineIndex);
+            pWriter.Write(index);
             pWriter.Write(name);
             pWriter.Write(hashName);
             pWriter.Write(speed);
+            pWriter.Write(motionName);
 
             pWriter.Write(transtionList.Count);
             for (int i = 0; i < transtionList.Count; i++)
@@ -48,9 +57,12 @@ namespace AniPlayable.InstanceAnimation
 #endif
         public void ReadFromFile(System.IO.BinaryReader pReader)
         {
+            machineIndex = pReader.ReadInt32();
+            index = pReader.ReadInt32();
             name = pReader.ReadString();
             hashName = pReader.ReadInt32();
             speed = pReader.ReadSingle();
+            motionName = pReader.ReadString();
 
             int tlen = pReader.ReadInt32();
             for (int i = 0; i < tlen; i++)

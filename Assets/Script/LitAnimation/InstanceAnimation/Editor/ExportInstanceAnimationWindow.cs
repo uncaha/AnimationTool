@@ -152,6 +152,8 @@ namespace AniPlayable.InstanceAnimation
                             PrepareBoneTexture(aniInfo);
                             SetupAnimationTexture(aniInfo);
                             SaveAnimationInfo(generatedPrefab.name, workingInfo);
+
+                            Debug.Log("Complete !!!!");
                         }
                         catch (System.Exception erro)
                         {
@@ -436,13 +438,13 @@ namespace AniPlayable.InstanceAnimation
             int bakeFPS,
             int animationIndex)
         {
-            var tmachineInfo = new AnimationStateMachineInfo() { defaultHashName = stateMachine.defaultState.nameHash };
+            var tmachineInfo = new AnimationStateMachineInfo() {layerIndex = pLayerInfo.index,index = pLayerInfo.machines.Count, defaultHashName = stateMachine.defaultState.nameHash };
             pLayerInfo.machines.Add(tmachineInfo);
 
             for (int i = 0; i != stateMachine.states.Length; ++i)
             {
                 ChildAnimatorState state = stateMachine.states[i];
-                var tstateinfo = new AnimationStateInfo();
+                var tstateinfo = new AnimationStateInfo(){machineIndex = tmachineInfo.index,index = i};
                 tstateinfo.SetData(state.state);
                 tmachineInfo.stateInfos.Add(tstateinfo);
 

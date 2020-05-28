@@ -35,6 +35,7 @@ namespace AniPlayable.InstanceAnimation
 
         #region runtime
         public PlayableAnimatorParameter Params { get; private set; }
+        public RuntimeAnimatorLayerGroup Layers { get; private set; }
         [NonSerialized] public Transform worldTransform;
         [NonSerialized] public int layer;
         float speedParameter = 1.0f, cacheParameter = 1.0f;
@@ -46,6 +47,8 @@ namespace AniPlayable.InstanceAnimation
         }
         public bool IsLoop() { return Mode == WrapMode.Loop; }
         public bool IsPause() { return speedParameter == 0.0f; }
+
+        public RuntimeAnimatorState cureState { get; private set; }
 
         [NonSerialized] public float curFrame;
 
@@ -81,8 +84,6 @@ namespace AniPlayable.InstanceAnimation
         private List<AnimationInstancing> listAttachment;
         #endregion
 
-        private UpdateObject updateObject;
-
         #region Init Method
         private bool m_IsInitialized = false;
         private void Awake()
@@ -94,14 +95,13 @@ namespace AniPlayable.InstanceAnimation
         {
             if (m_IsInitialized) return;
             Initialize();
-            if(autoPlay)
+            if (autoPlay)
             {
                 PlayAnimation(2);
                 //Pause();
             }
-            
-        }
 
+        }
         private void Initialize()
         {
             if (m_IsInitialized) return;
@@ -198,17 +198,8 @@ namespace AniPlayable.InstanceAnimation
             AnimationInstancingMgr.Instance.AddBoundingSphere(this);
             AnimationInstancingMgr.Instance.AddInstance(gameObject);
 
-            updateObject = new UpdateObject(this, UpdateRender);
-            PlayableUpdateManager.Reg(updateObject);
             m_IsInitialized = true;
         }
-
-        public void UpdateRender(float dt)
-        {
-
-        }
-        #endregion
-
         private void OnDestroy()
         {
             if (!AnimationInstancingMgr.IsDestroy())
@@ -220,7 +211,6 @@ namespace AniPlayable.InstanceAnimation
                 parentInstance.Deattach(this);
                 parentInstance = null;
             }
-            PlayableUpdateManager.UnReg(updateObject);
         }
 
         private void OnEnable()
@@ -249,7 +239,6 @@ namespace AniPlayable.InstanceAnimation
             }
         }
 
-
         public bool InitializeAnimation()
         {
             if (prototype == null)
@@ -276,6 +265,7 @@ namespace AniPlayable.InstanceAnimation
             {
                 aniInfo = info.listAniInfo;
                 PrepareParams(info.paramList);
+                PrepareLayer(info.layerList);
                 Prepare(aniInfo, info.extraBoneInfo);
             }
             searchInfo = new AnimationInfo();
@@ -291,14 +281,10 @@ namespace AniPlayable.InstanceAnimation
             }
         }
 
-        private void PrepareTransition(AnimationInfo pInfo)
+        private void PrepareLayer(List<AnimationLayerInfo> pLayerList)
         {
-            // for (int i = 0; i < pInfo.transtionList.Count; i++)
-            // {
-            //     var item = pInfo.transtionList[i];
-            //     AnimatorTransition item2 = new AnimatorTransition(Params, item, i);
-            //     pInfo.animatorTransitions.Add(item2);
-            // }
+            Layers = new RuntimeAnimatorLayerGroup(pLayerList) { parameters = Params };
+            Layers.InitNode();
         }
 
         public void Prepare(List<AnimationInfo> infoList, ExtraBoneInfo extraBoneInfo)
@@ -350,7 +336,9 @@ namespace AniPlayable.InstanceAnimation
             Destroy(GetComponent<Animator>());
 
         }
+        #endregion
 
+        #region tool
         private void CalcBoundingSphere()
         {
             UnityEngine.Profiling.Profiler.BeginSample("CalcBoundingSphere()");
@@ -372,15 +360,46 @@ namespace AniPlayable.InstanceAnimation
             UnityEngine.Profiling.Profiler.EndSample();
         }
 
+        public AnimationInfo GetCurrentAnimationInfo()
+        {
+            if (aniInfo != null && 0 <= aniIndex && aniIndex < aniInfo.Count)
+            {
+                return aniInfo[aniIndex];
+            }
+            return null;
+        }
 
-        public void PlayAnimation(string name)
+        public AnimationInfo GetPreAnimationInfo()
+        {
+            if (aniInfo != null && 0 <= preAniIndex && preAniIndex < aniInfo.Count)
+            {
+                return aniInfo[preAniIndex];
+            }
+            return null;
+        }
+
+        private int FindAnimationInfo(int hash)
+        {
+            if (aniInfo == null)
+                return -1;
+            searchInfo.animationNameHash = hash;
+            return aniInfo.BinarySearch(searchInfo, comparer);
+        }
+        #endregion
+
+        #region control
+        public void Play(string pName,int pLayer = 0)
+        {
+           // Layers
+        }
+        private void PlayAnimation(string name)
         {
             int hash = name.GetHashCode();
             int index = FindAnimationInfo(hash);
             PlayAnimation(index);
         }
 
-        public void PlayAnimation(int animationIndex)
+        private void PlayAnimation(int animationIndex)
         {
             if (aniInfo == null)
             {
@@ -415,14 +434,14 @@ namespace AniPlayable.InstanceAnimation
             RefreshAttachmentAnimation(aniTextureIndex);
         }
 
-        public void CrossFade(string animationName, float duration)
+        private void CrossFade(string animationName, float duration)
         {
             int hash = animationName.GetHashCode();
             int index = FindAnimationInfo(hash);
             CrossFade(index, duration);
         }
 
-        public void CrossFade(int animationIndex, float duration)
+        private void CrossFade(int animationIndex, float duration)
         {
             PlayAnimation(animationIndex);
             if (duration > 0.0f)
@@ -466,25 +485,9 @@ namespace AniPlayable.InstanceAnimation
         {
             return aniInfo != null;
         }
+        #endregion
 
-        public AnimationInfo GetCurrentAnimationInfo()
-        {
-            if (aniInfo != null && 0 <= aniIndex && aniIndex < aniInfo.Count)
-            {
-                return aniInfo[aniIndex];
-            }
-            return null;
-        }
-
-        public AnimationInfo GetPreAnimationInfo()
-        {
-            if (aniInfo != null && 0 <= preAniIndex && preAniIndex < aniInfo.Count)
-            {
-                return aniInfo[preAniIndex];
-            }
-            return null;
-        }
-
+        #region  update
         public void UpdateAnimation()
         {
             if (aniInfo == null || IsPause())
@@ -548,34 +551,22 @@ namespace AniPlayable.InstanceAnimation
                 attachment.transform.rotation = transform.rotation;
             }
             UpdateAnimationEvent();
-            UpdateTranstions();
+            UpdateState();
         }
 
-        bool transtioning = true;
-        int transtingIndex = 0;
-        void UpdateTranstions()
+        void UpdateState()
         {
+            if (cureState == null) return;
+            AnimationInfo info = GetCurrentAnimationInfo();
+            if (info == null || cureState.motionHash != info.animationNameHash) return;
 
-            // AnimationInfo info = GetCurrentAnimationInfo();
-            // if (info == null)
-            //     return;
-            // if (info.animatorTransitions.Count == 0)
-            //     return;
-            
-            // float tprocess = curFrame / info.totalFrame;
-            // var transtions = info.animatorTransitions;
-            // for (int i = 0; i < transtions.Count; i++)
-            // {
-            //     var ttrans = transtions[i];
-            //     if (ttrans.CheckCondition())
-            //     {
-            //         if (ttrans.exitTime < tprocess)
-            //         {
-            //             CrossFade(ttrans.destinationStateName, ttrans.duration);
-            //         }
-            //     }
+            float tprocess = curFrame / info.totalFrame;
 
-            // }
+            var ttrans = cureState.CheckTransition(tprocess);
+            if (ttrans != null)
+            {
+                CrossFade(ttrans.destinationStateName, ttrans.duration);
+            }
         }
 
         public void UpdateLod(Vector3 cameraPosition)
@@ -627,15 +618,9 @@ namespace AniPlayable.InstanceAnimation
                 }
             }
         }
+        #endregion
 
-        private int FindAnimationInfo(int hash)
-        {
-            if (aniInfo == null)
-                return -1;
-            searchInfo.animationNameHash = hash;
-            return aniInfo.BinarySearch(searchInfo, comparer);
-        }
-
+        #region attach
         public void Attach(string boneName, AnimationInstancing attachment)
         {
             int index = -1;
@@ -740,21 +725,22 @@ namespace AniPlayable.InstanceAnimation
                 }
             }
         }
+        #endregion
 
         #region params
-          public void SetBool(string pKey, bool pValue)
+        public void SetBool(string pKey, bool pValue)
         {
             Params.SetBool(pKey, pValue);
         }
 
         public void SetInt(string pKey, int pValue)
         {
-            Params.SetInt(pKey,pValue);
+            Params.SetInt(pKey, pValue);
         }
 
         public void SetFloat(string pKey, float pValue)
         {
-            Params.SetFloat(pKey,pValue);
+            Params.SetFloat(pKey, pValue);
         }
 
         public bool GetBool(string pKey)
