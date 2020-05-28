@@ -6,10 +6,12 @@ namespace AniPlayable.InstanceAnimation
 {
     public class RuntimeAnimatorState : Node
     {
-        public string stateName;
-        public int nameHash;
-        public int motionHash = 0;
-        public int motionIndex = 0;
+        public int layerIndex {get{return stateInfo.layerIndex;}}
+        public int machineIndex {get{return stateInfo.machineIndex;}}
+        public string stateName {get{return stateInfo.name;}}
+        public int nameHash {get{return stateInfo.hashName;}}
+        public int motionHash {get; private set;}
+        public int motionIndex {get; private set;}
 
         public AnimationStateInfo stateInfo { get; protected set;}
         public List<AnimatorTransition> animatorTransitions = new List<AnimatorTransition>();
@@ -18,8 +20,6 @@ namespace AniPlayable.InstanceAnimation
         {
             if(pInfo == null) return;
             stateInfo = pInfo;
-            stateName = stateInfo.name;
-            nameHash = stateInfo.hashName;
             motionHash = stateInfo.motionName.GetHashCode();
         }
         public override void InitNode(AnimationInstancing pAnimator)

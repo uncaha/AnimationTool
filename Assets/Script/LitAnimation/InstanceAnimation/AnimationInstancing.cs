@@ -391,40 +391,33 @@ namespace AniPlayable.InstanceAnimation
         #region control
 
         #region control State
-        public void Play()
-        {
-            RuntimeAnimatorLayer tlayer = Layers[0];
-            if (tlayer == null)
-            {
-                Debug.LogError("Can't found layer by index " + 0);
-                return;
-            }
-            if (tlayer.defaultStateMachine == null)
-            {
-                Debug.LogError("the layer is not have defaultState. layer =" + 0);
-                return;
-            }
-
-            PlayState(tlayer.defaultStateMachine.defaultState);
-        }
-        public void Play(string pState, int pLayer = 0)
-        {
-            Play(pState.GetHashCode(), pLayer);
-        }
-        public void Play(int pHashState, int pLayer = 0)
+        private RuntimeAnimatorState GetState(int pHashState, int pLayer,int pMechine = 0)
         {
             RuntimeAnimatorLayer tlayer = Layers[pLayer];
             if (tlayer == null)
             {
                 Debug.LogError("Can't found layer by index " + pLayer);
-                return;
+                return null;
             }
-            if (tlayer.defaultStateMachine == null)
+            if (tlayer[pMechine] == null)
             {
                 Debug.LogError("the layer is not have defaultState. layer =" + pLayer);
-                return;
+                return null;
             }
-            PlayState(tlayer.defaultStateMachine[pHashState]);
+
+            return pHashState == 0 ? tlayer[pMechine].defaultState : tlayer[pMechine][pHashState];
+        }
+        public void Play()
+        {
+            PlayState(GetState(0,0));
+        }
+        public void Play(string pState, int pLayer = 0,int pMechine = 0)
+        {
+            Play(pState.GetHashCode(), pLayer,pMechine);
+        }
+        public void Play(int pHashState, int pLayer = 0,int pMechine = 0)
+        {
+            PlayState(GetState(pHashState,pLayer,pMechine));
         }
 
         public void PlayState(RuntimeAnimatorState pState)
@@ -438,6 +431,30 @@ namespace AniPlayable.InstanceAnimation
             {
                 cureState = pState;
                 PlayAnimation(pState.motionIndex);
+            }  
+        }
+
+        public void CrossFade(string stateName, float duration,int pLayer = 0,int pMechine = 0)
+        {
+            CrossFade(stateName.GetHashCode(),duration,pLayer,pMechine);
+        }
+
+        public void CrossFade(int stateHash, float duration ,int pLayer = 0,int pMechine = 0)
+        {
+            CrossFade(GetState(stateHash, pLayer,pMechine), duration);
+        }
+
+        public void CrossFade(RuntimeAnimatorState pState, float duration)
+        {
+             if (pState == null)
+            {
+                Debug.LogError("Can't found tstate by hash " + pState);
+                return;
+            }
+            if(pState.motionIndex >= 0)
+            {
+                cureState = pState;
+                CrossFadeAnimation(pState.motionIndex,duration);
             }  
         }
         #endregion
@@ -485,14 +502,14 @@ namespace AniPlayable.InstanceAnimation
             RefreshAttachmentAnimation(aniTextureIndex);
         }
 
-        private void CrossFade(string animationName, float duration)
+        private void CrossFadeAnimation(string animationName, float duration)
         {
             int hash = animationName.GetHashCode();
             int index = FindAnimationInfo(hash);
-            CrossFade(index, duration);
+            CrossFadeAnimation(index, duration);
         }
 
-        private void CrossFade(int animationIndex, float duration)
+        private void CrossFadeAnimation(int animationIndex, float duration)
         {
             PlayAnimation(animationIndex);
             if (duration > 0.0f)
@@ -611,16 +628,15 @@ namespace AniPlayable.InstanceAnimation
 
         void UpdateState()
         {
-            if (cureState == null) return;
+            if (cureState == null || cureState.motionIndex != aniIndex) return;
             AnimationInfo info = GetCurrentAnimationInfo();
-            if (info == null || cureState.motionHash != info.animationNameHash) return;
-
             float tprocess = curFrame / info.totalFrame;
 
             var ttrans = cureState.CheckTransition(tprocess);
             if (ttrans != null)
             {
-                CrossFade(ttrans.destinationStateName, ttrans.duration);
+                CrossFade(ttrans.destinationHashName,ttrans.duration,cureState.layerIndex,cureState.machineIndex);
+                //CrossFadeAnimation(ttrans.destinationStateName, ttrans.duration);
             }
         }
 

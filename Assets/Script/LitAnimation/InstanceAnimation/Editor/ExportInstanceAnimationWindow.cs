@@ -33,7 +33,7 @@ namespace AniPlayable.InstanceAnimation
         [SerializeField]
         private List<AnimationClip> customClips = new List<AnimationClip>();
         private Dictionary<string, bool> generateAnims = new Dictionary<string, bool>();
-
+        private Dictionary<UnityEditor.Animations.AnimatorState, UnityEditor.Animations.AnimatorStateTransition[]> cacheTransition;
 
         private ArrayList aniInfo = new ArrayList();
         private int aniFps = 15;
@@ -75,6 +75,7 @@ namespace AniPlayable.InstanceAnimation
         {
             layerInfos = new List<AnimationLayerInfo>();
             generateInfo = new List<AnimationBakeInfo>();
+            cacheTransition = new Dictionary<UnityEditor.Animations.AnimatorState, UnityEditor.Animations.AnimatorStateTransition[]>();
 
             cacheAnimationEvent = new Dictionary<AnimationClip, UnityEngine.AnimationEvent[]>();
             generatedPrefab = null;
@@ -141,6 +142,11 @@ namespace AniPlayable.InstanceAnimation
                     aniInfo.Add(workingInfo.info);
                     if (generateInfo.Count == 0)
                     {
+                        foreach (var obj in cacheTransition)
+                        {
+                            obj.Key.transitions = obj.Value;
+                        }
+                        cacheTransition.Clear();
 
                         foreach (var obj in cacheAnimationEvent)
                         {
@@ -402,6 +408,7 @@ namespace AniPlayable.InstanceAnimation
                 totalFrame = 0;
 
                 //初始化数据
+                cacheTransition.Clear();
                 cacheAnimationEvent.Clear();
                 layerInfos.Clear();
 
@@ -444,7 +451,7 @@ namespace AniPlayable.InstanceAnimation
             for (int i = 0; i != stateMachine.states.Length; ++i)
             {
                 ChildAnimatorState state = stateMachine.states[i];
-                var tstateinfo = new AnimationStateInfo(){machineIndex = tmachineInfo.index,index = i};
+                var tstateinfo = new AnimationStateInfo(){layerIndex = pLayerInfo.index,machineIndex = tmachineInfo.index,index = i};
                 tstateinfo.SetData(state.state);
                 tmachineInfo.stateInfos.Add(tstateinfo);
 
@@ -508,8 +515,9 @@ namespace AniPlayable.InstanceAnimation
                     bake.info.eventList.Add(aniEvent);
                 }
 
-
+                cacheTransition.Add(state.state, state.state.transitions);
                 state.state.transitions = null;
+
                 cacheAnimationEvent.Add(clip, clip.events);
                 UnityEngine.AnimationEvent[] tempEvent = new UnityEngine.AnimationEvent[0];
                 UnityEditor.AnimationUtility.SetAnimationEvents(clip, tempEvent);

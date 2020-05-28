@@ -5,23 +5,19 @@ namespace AniPlayable.Module
 {
     public class AnimatorTransition : AnimatorModule
     {
+        
         public int Index { get; private set; }
         public AnimatorCondition[] conditions { get; private set; }
 
-        public string destinationStateMachineName;
-        public string destinationStateName;
-        public float duration;
-        public float exitTime;
+        public string destinationName { get { return transtion.destinationName; } }
+        public int destinationHashName {get;private set;}
+        public float duration { get { return transtion.duration; } }
+        public float exitTime { get { return transtion.exitTime; } }
         protected AssetTransitions.Transtions transtion;
         public AnimatorTransition(PlayableAnimatorParameter parms,AssetTransitions.Transtions pData, int pIndex)
         {
             transtion = pData;
             Index = pIndex;
-
-            destinationStateMachineName = pData.destinationStateMachineName;
-            destinationStateName = pData.destinationStateName;
-            duration = pData.duration;
-            exitTime = pData.exitTime;
 
             if(transtion.conditions != null && transtion.conditions.Length > 0)
             {
@@ -31,7 +27,8 @@ namespace AniPlayable.Module
                     conditions[i] = new AnimatorCondition(parms,transtion.conditions[i],i);
                 }
             }
-            
+
+            destinationHashName = destinationName.GetHashCode();
         }
 
         public bool CheckCondition()

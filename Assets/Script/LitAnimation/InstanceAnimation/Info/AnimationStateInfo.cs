@@ -9,6 +9,7 @@ namespace AniPlayable.InstanceAnimation
 {
     public class AnimationStateInfo
     {
+        public int layerIndex = 0;
         public int machineIndex = 0;
         public int index = 0;
         public string name;
@@ -39,6 +40,7 @@ namespace AniPlayable.InstanceAnimation
 
         public void WriteToFile(System.IO.BinaryWriter pWriter)
         {
+            pWriter.Write(layerIndex);
             pWriter.Write(machineIndex);
             pWriter.Write(index);
             pWriter.Write(name);
@@ -56,6 +58,7 @@ namespace AniPlayable.InstanceAnimation
 #endif
         public void ReadFromFile(System.IO.BinaryReader pReader)
         {
+            layerIndex = pReader.ReadInt32();
             machineIndex = pReader.ReadInt32();
             index = pReader.ReadInt32();
             name = pReader.ReadString();

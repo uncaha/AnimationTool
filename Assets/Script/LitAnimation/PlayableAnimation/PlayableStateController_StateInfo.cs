@@ -374,7 +374,7 @@ namespace AniPlayable
                         if (ttrans.exitTime < m_TimePrecess)
                         {
                             transtioning = true;
-                            pLayer.Crossfade(ttrans.destinationStateName, ttrans.duration, false);
+                            pLayer.Crossfade(ttrans.destinationName, ttrans.duration, false);
                         }
                     }
 
