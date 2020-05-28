@@ -13,14 +13,23 @@ namespace AniPlayable.InstanceAnimation
             layerListInfo = pInfo;
         }
 
-        public override void InitNode()
+        public override void InitNode(AnimationInstancing pAnimator)
         {
             var tpam = parameters;
             foreach (var item in layerListInfo)
             {
                 var trtlayer = new RuntimeAnimatorLayer(item){parameters = tpam};
-                trtlayer.InitNode();
+                trtlayer.InitNode(pAnimator);
                 LayerList.Add(trtlayer);
+            }
+        }
+
+        public RuntimeAnimatorLayer this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= LayerList.Count) return null;
+                return LayerList[index];
             }
         }
     }

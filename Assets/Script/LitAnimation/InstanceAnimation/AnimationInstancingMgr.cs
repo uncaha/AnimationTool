@@ -186,7 +186,7 @@ namespace AniPlayable.InstanceAnimation
             }
             catch (Exception e)
             {
-                Debug.LogError(e.Message);
+                Debug.LogError(e.ToString());
                 Debug.Log("Initialize animation failed. Please check out the backed animation infos and regenerate it.");
                 script.enabled = false;
             }

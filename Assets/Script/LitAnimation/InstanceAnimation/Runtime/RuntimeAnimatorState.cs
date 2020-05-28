@@ -13,17 +13,18 @@ namespace AniPlayable.InstanceAnimation
 
         public AnimationStateInfo stateInfo { get; protected set;}
         public List<AnimatorTransition> animatorTransitions = new List<AnimatorTransition>();
-        public AnimationInstancing aniInfo;
 
         public RuntimeAnimatorState(AnimationStateInfo pInfo)
         {
+            if(pInfo == null) return;
             stateInfo = pInfo;
             stateName = stateInfo.name;
             nameHash = stateInfo.hashName;
             motionHash = stateInfo.motionName.GetHashCode();
         }
-        public override void InitNode()
+        public override void InitNode(AnimationInstancing pAnimator)
         {
+            motionIndex = pAnimator.FindAnimationInfo(motionHash);
             for (int i = 0; i < stateInfo.transtionList.Count; i++)
             {
                 var item = stateInfo.transtionList[i];

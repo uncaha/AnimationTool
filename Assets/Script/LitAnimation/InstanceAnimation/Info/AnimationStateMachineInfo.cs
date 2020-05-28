@@ -8,6 +8,7 @@ namespace AniPlayable.InstanceAnimation
         public int layerIndex;
         public int index;
         public AnimationStateInfo defaultState;
+        public string defaultName;
         public int defaultHashName;
         public List<AnimationStateInfo> stateInfos = new List<AnimationStateInfo>();
 
@@ -16,7 +17,7 @@ namespace AniPlayable.InstanceAnimation
         {
             pWriter.Write(layerIndex);
             pWriter.Write(index);
-            pWriter.Write(defaultHashName);
+            pWriter.Write(defaultName);
 
             pWriter.Write(stateInfos.Count);
             for (int i = 0; i < stateInfos.Count; i++)
@@ -32,8 +33,8 @@ namespace AniPlayable.InstanceAnimation
         {
             layerIndex = pReader.ReadInt32();
             index = pReader.ReadInt32();
-            defaultHashName = pReader.ReadInt32();
-
+            defaultName = pReader.ReadString();
+            defaultHashName = defaultName.GetHashCode();
             int tlen = pReader.ReadInt32();
             for (int i = 0; i < tlen; i++)
             {

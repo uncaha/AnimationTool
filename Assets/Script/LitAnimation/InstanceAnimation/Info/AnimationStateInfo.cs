@@ -42,7 +42,6 @@ namespace AniPlayable.InstanceAnimation
             pWriter.Write(machineIndex);
             pWriter.Write(index);
             pWriter.Write(name);
-            pWriter.Write(hashName);
             pWriter.Write(speed);
             pWriter.Write(motionName);
 
@@ -60,9 +59,10 @@ namespace AniPlayable.InstanceAnimation
             machineIndex = pReader.ReadInt32();
             index = pReader.ReadInt32();
             name = pReader.ReadString();
-            hashName = pReader.ReadInt32();
             speed = pReader.ReadSingle();
             motionName = pReader.ReadString();
+
+            hashName = name.GetHashCode();
 
             int tlen = pReader.ReadInt32();
             for (int i = 0; i < tlen; i++)

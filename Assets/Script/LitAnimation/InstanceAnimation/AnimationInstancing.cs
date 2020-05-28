@@ -97,8 +97,7 @@ namespace AniPlayable.InstanceAnimation
             Initialize();
             if (autoPlay)
             {
-                PlayAnimation(2);
-                //Pause();
+                Play();
             }
 
         }
@@ -260,6 +259,9 @@ namespace AniPlayable.InstanceAnimation
                 return true;
             }
 
+            searchInfo = new AnimationInfo();
+            comparer = new ComparerHash();
+
             AnimationManager.InstanceAnimationInfo info = AnimationManager.Instance.FindAnimationInfo(prototype, this);
             if (info != null)
             {
@@ -268,8 +270,7 @@ namespace AniPlayable.InstanceAnimation
                 PrepareLayer(info.layerList);
                 Prepare(aniInfo, info.extraBoneInfo);
             }
-            searchInfo = new AnimationInfo();
-            comparer = new ComparerHash();
+            
             return true;
         }
 
@@ -284,7 +285,7 @@ namespace AniPlayable.InstanceAnimation
         private void PrepareLayer(List<AnimationLayerInfo> pLayerList)
         {
             Layers = new RuntimeAnimatorLayerGroup(pLayerList) { parameters = Params };
-            Layers.InitNode();
+            Layers.InitNode(this);
         }
 
         public void Prepare(List<AnimationInfo> infoList, ExtraBoneInfo extraBoneInfo)
@@ -378,7 +379,7 @@ namespace AniPlayable.InstanceAnimation
             return null;
         }
 
-        private int FindAnimationInfo(int hash)
+        public int FindAnimationInfo(int hash)
         {
             if (aniInfo == null)
                 return -1;
@@ -388,10 +389,60 @@ namespace AniPlayable.InstanceAnimation
         #endregion
 
         #region control
-        public void Play(string pName,int pLayer = 0)
+
+        #region control State
+        public void Play()
         {
-           // Layers
+            RuntimeAnimatorLayer tlayer = Layers[0];
+            if (tlayer == null)
+            {
+                Debug.LogError("Can't found layer by index " + 0);
+                return;
+            }
+            if (tlayer.defaultStateMachine == null)
+            {
+                Debug.LogError("the layer is not have defaultState. layer =" + 0);
+                return;
+            }
+
+            PlayState(tlayer.defaultStateMachine.defaultState);
         }
+        public void Play(string pState, int pLayer = 0)
+        {
+            Play(pState.GetHashCode(), pLayer);
+        }
+        public void Play(int pHashState, int pLayer = 0)
+        {
+            RuntimeAnimatorLayer tlayer = Layers[pLayer];
+            if (tlayer == null)
+            {
+                Debug.LogError("Can't found layer by index " + pLayer);
+                return;
+            }
+            if (tlayer.defaultStateMachine == null)
+            {
+                Debug.LogError("the layer is not have defaultState. layer =" + pLayer);
+                return;
+            }
+            PlayState(tlayer.defaultStateMachine[pHashState]);
+        }
+
+        public void PlayState(RuntimeAnimatorState pState)
+        {
+            if (pState == null)
+            {
+                Debug.LogError("Can't found tstate by hash " + pState);
+                return;
+            }
+            if(pState.motionIndex > 0)
+            {
+                cureState = pState;
+                PlayAnimation(pState.motionIndex);
+            }  
+        }
+        #endregion
+
+        #region control animation
         private void PlayAnimation(string name)
         {
             int hash = name.GetHashCode();
@@ -474,6 +525,8 @@ namespace AniPlayable.InstanceAnimation
             preAniIndex = -1;
             eventIndex = -1;
             curFrame = 0.0f;
+
+            cureState = null;
         }
 
         public bool IsPlaying()
@@ -485,6 +538,8 @@ namespace AniPlayable.InstanceAnimation
         {
             return aniInfo != null;
         }
+        #endregion
+
         #endregion
 
         #region  update
