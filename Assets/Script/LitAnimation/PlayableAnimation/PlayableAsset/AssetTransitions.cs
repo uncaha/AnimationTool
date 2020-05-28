@@ -17,7 +17,7 @@ namespace AniPlayable
         public class Transtions
         {
             public int ownerMachineIndex = 0;
-            DestinationType destinationType = DestinationType.none;
+            public DestinationType destinationType = DestinationType.none;
             public string destinationName = "";
             public float duration;
             public float exitTime;

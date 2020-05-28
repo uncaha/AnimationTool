@@ -7,12 +7,13 @@ namespace AniPlayable.Module
     {
         
         public int Index { get; private set; }
-        public AnimatorCondition[] conditions { get; private set; }
-
+        public AssetTransitions.DestinationType destinationType{ get { return transtion.destinationType; } }
         public string destinationName { get { return transtion.destinationName; } }
         public int destinationHashName {get;private set;}
         public float duration { get { return transtion.duration; } }
         public float exitTime { get { return transtion.exitTime; } }
+
+        AnimatorCondition[] conditions { get; set; }
         protected AssetTransitions.Transtions transtion;
         public AnimatorTransition(PlayableAnimatorParameter parms,AssetTransitions.Transtions pData, int pIndex)
         {

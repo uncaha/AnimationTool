@@ -635,7 +635,17 @@ namespace AniPlayable.InstanceAnimation
             var ttrans = cureState.CheckTransition(tprocess);
             if (ttrans != null)
             {
-                CrossFade(ttrans.destinationHashName,ttrans.duration,cureState.layerIndex,cureState.machineIndex);
+                if(ttrans.destinationType == AssetTransitions.DestinationType.state)
+                {
+                    CrossFade(ttrans.destinationHashName,ttrans.duration,cureState.layerIndex,cureState.machineIndex);
+                }
+                else if(ttrans.destinationType == AssetTransitions.DestinationType.stateMachine)
+                {
+                    int tindex = Layers[cureState.layerIndex].GetMachineIndex(ttrans.destinationHashName);
+                    var tstate = GetState(0,cureState.layerIndex,tindex);
+                    CrossFade(tstate,ttrans.duration);
+                }
+                
                 //CrossFadeAnimation(ttrans.destinationStateName, ttrans.duration);
             }
         }

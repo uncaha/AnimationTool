@@ -24,6 +24,7 @@ namespace AniPlayable.InstanceAnimation
                 var tmachine = new RuntimeAnimatorMachine(item){parameters = tpam};
                 tmachine.InitNode(pAnimator);
                 machineList.Add(tmachine);
+                machineDic.Add(tmachine.defaultHashName,tmachine);
             }
             if(machineList.Count > 0)
                 defaultStateMachine = machineList[0];
@@ -37,5 +38,11 @@ namespace AniPlayable.InstanceAnimation
                 return machineList[index];
             }
         }
+
+        public int GetMachineIndex(int pHashName)
+        {
+            if(!machineDic.ContainsKey(pHashName)) return -1;
+            return machineDic[pHashName].index;
+        } 
     }
 }
