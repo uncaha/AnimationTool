@@ -338,8 +338,18 @@ namespace AniPlayable.InstanceAnimation
             {
                 if (GUILayout.Button(string.Format("Generate")))
                 {
-                    //BakeAnimation();
-                    BakeWithAnimator();
+                    string tfile = GetFullPahtFile(generatedPrefab.name);
+                    if (File.Exists(tfile))
+                    {
+                        if (EditorUtility.DisplayDialog("Export To Animation", string.Format("{0} is already in path {1}.",generatedPrefab.name,tfile), "OverWrite", "cancel"))
+                        {
+                            BakeWithAnimator();
+                        }
+                    }else
+                    {
+                        BakeWithAnimator();
+                    }
+                    
                 }
             }
         }
@@ -542,10 +552,21 @@ namespace AniPlayable.InstanceAnimation
         // {
         //     return string.Format("{0}/{1}.asset", "Resources/AnimationTexture", name);
         // }
-        private void SaveAnimationInfo(string name,AnimationBakeInfo pWorkInfo)
+        public string GetFilePath()
         {
             string folderName = "Resources/AnimationTexture";
-            string path = Application.dataPath + "/" + folderName + "/";
+            return  Application.dataPath + "/" + folderName + "/";
+        }
+
+        public string GetFullPahtFile(string pName)
+        {
+            string tpath = GetFilePath();
+            return tpath + pName + ".bytes";
+        }
+
+        private void SaveAnimationInfo(string name,AnimationBakeInfo pWorkInfo)
+        {
+            string path =GetFilePath();
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -553,7 +574,7 @@ namespace AniPlayable.InstanceAnimation
 
             UnityEditor.Animations.AnimatorController controller = pWorkInfo.animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
                 //AssetDatabase.CreateFolder("Assets/Resources", folderName);
-            FileStream file = File.Open(path + name + ".bytes", FileMode.Create);
+            FileStream file = File.Open(GetFullPahtFile(name), FileMode.Create);
             BinaryWriter writer = new BinaryWriter(file);
 
             //存储参数
