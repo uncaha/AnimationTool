@@ -10,8 +10,9 @@ namespace AniPlayable.InstanceAnimation
         public RuntimeAnimatorMachine defaultStateMachine {get ; private set;}
         
         AnimationLayerInfo layerInfo;
-        private List<RuntimeAnimatorMachine> machineList = new List<RuntimeAnimatorMachine>();
-        private Dictionary<int,RuntimeAnimatorMachine> machineDic = new Dictionary<int,RuntimeAnimatorMachine>();
+        int machineCount = 0;
+        private RuntimeAnimatorMachine[] machineList;
+        private Dictionary<int,int> hashMap = new Dictionary<int, int>();
         public RuntimeAnimatorLayer(AnimationLayerInfo pInfo)
         {
             layerInfo = pInfo;
@@ -19,14 +20,17 @@ namespace AniPlayable.InstanceAnimation
         public override void InitNode(AnimationInstancing pAnimator)
         {
             var tpam = parameters;
-            foreach (var item in layerInfo.machines)
-            {
+            machineCount = layerInfo.machines.Count;
+            machineList = new RuntimeAnimatorMachine[machineCount];
+            for (int i = 0; i < machineCount; i++)
+            {   
+                var item = layerInfo.machines[i];
                 var tmachine = new RuntimeAnimatorMachine(item){parameters = tpam};
                 tmachine.InitNode(pAnimator);
-                machineList.Add(tmachine);
-                machineDic.Add(tmachine.defaultHashName,tmachine);
+                machineList[i] = tmachine;
+                hashMap.Add(tmachine.machineHashName,i);
             }
-            if(machineList.Count > 0)
+            if(machineCount > 0)
                 defaultStateMachine = machineList[0];
         }
 
@@ -34,15 +38,18 @@ namespace AniPlayable.InstanceAnimation
         {
             get
             {
-                if (index < 0 || index >= machineList.Count) return null;
+                if (index < 0 || index >= machineCount) return null;
                 return machineList[index];
             }
         }
 
         public int GetMachineIndex(int pHashName)
         {
-            if(!machineDic.ContainsKey(pHashName)) return -1;
-            return machineDic[pHashName].index;
-        } 
+            if(hashMap.TryGetValue(pHashName,out int ret))
+            {
+                return ret;
+            }
+            return -1;
+        }
     }
 }

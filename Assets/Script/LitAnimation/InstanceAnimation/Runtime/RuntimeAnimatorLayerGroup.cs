@@ -7,7 +7,8 @@ namespace AniPlayable.InstanceAnimation
     public class RuntimeAnimatorLayerGroup: Node
     {   
         public List<AnimationLayerInfo> layerListInfo {get; private set;}
-        private List<RuntimeAnimatorLayer> LayerList = new List<RuntimeAnimatorLayer>();
+        private RuntimeAnimatorLayer[] LayerList;
+        private int layerLength = 0;
         public RuntimeAnimatorLayerGroup(List<AnimationLayerInfo> pInfo)
         {
             layerListInfo = pInfo;
@@ -16,11 +17,14 @@ namespace AniPlayable.InstanceAnimation
         public override void InitNode(AnimationInstancing pAnimator)
         {
             var tpam = parameters;
-            foreach (var item in layerListInfo)
+            layerLength = layerListInfo.Count;
+            LayerList = new RuntimeAnimatorLayer[layerLength];
+            for (int i = 0; i < layerLength; i++)
             {
+                var item = layerListInfo[i];
                 var trtlayer = new RuntimeAnimatorLayer(item){parameters = tpam};
                 trtlayer.InitNode(pAnimator);
-                LayerList.Add(trtlayer);
+                LayerList[i] = trtlayer;
             }
         }
 
@@ -28,7 +32,7 @@ namespace AniPlayable.InstanceAnimation
         {
             get
             {
-                if (index < 0 || index >= LayerList.Count) return null;
+                if (index < 0 || index >= layerLength) return null;
                 return LayerList[index];
             }
         }

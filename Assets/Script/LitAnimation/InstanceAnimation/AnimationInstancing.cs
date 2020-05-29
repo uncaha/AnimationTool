@@ -403,7 +403,7 @@ namespace AniPlayable.InstanceAnimation
                 return null;
             }
 
-            return pHashState == 0 ? tlayer[pMechine].defaultState : tlayer[pMechine][pHashState];
+            return pHashState == 0 ? tlayer[pMechine].defaultState : tlayer[pMechine].GetState(pHashState);
         }
         public void Play()
         {
@@ -444,7 +444,7 @@ namespace AniPlayable.InstanceAnimation
 
         public void CrossFade(RuntimeAnimatorState pState, float duration)
         {
-             if (pState == null)
+            if (pState == null)
             {
                 Debug.LogError("Can't found tstate by hash " + pState);
                 return;

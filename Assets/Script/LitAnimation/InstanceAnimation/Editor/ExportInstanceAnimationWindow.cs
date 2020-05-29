@@ -445,7 +445,9 @@ namespace AniPlayable.InstanceAnimation
             int bakeFPS,
             int animationIndex)
         {
-            var tmachineInfo = new AnimationStateMachineInfo() {layerIndex = pLayerInfo.index,index = pLayerInfo.machines.Count, defaultName = stateMachine.defaultState.name };
+            var tmachineInfo = new AnimationStateMachineInfo() {layerIndex = pLayerInfo.index,index = pLayerInfo.machines.Count, 
+                                                                defaultName = stateMachine.defaultState !=null ? stateMachine.defaultState.name : "",
+                                                                machineName = stateMachine.name};
             pLayerInfo.machines.Add(tmachineInfo);
 
             for (int i = 0; i != stateMachine.states.Length; ++i)

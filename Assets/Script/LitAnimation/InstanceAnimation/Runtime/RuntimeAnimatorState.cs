@@ -6,20 +6,19 @@ namespace AniPlayable.InstanceAnimation
 {
     public class RuntimeAnimatorState : Node
     {
-        public readonly int layerIndex ;
-        public readonly int machineIndex ;
-        public readonly string stateName ;
-        public readonly int nameHash ;
-        public readonly int motionHash ;
-        public int motionIndex ;
-
-        private AnimationStateInfo stateInfo ;
+        public readonly int layerIndex;
+        public readonly int machineIndex;
+        public readonly string stateName;
+        public readonly int nameHash;
+        public readonly int motionHash;
+        public int motionIndex;
+        private AnimationStateInfo stateInfo;
         private AnimatorTransition[] animatorTransitions;
         private int transLength = 0;
 
         public RuntimeAnimatorState(AnimationStateInfo pInfo)
         {
-            if(pInfo == null) return;
+            if (pInfo == null) return;
             stateInfo = pInfo;
             layerIndex = stateInfo.layerIndex;
             machineIndex = stateInfo.machineIndex;

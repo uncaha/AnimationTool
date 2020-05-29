@@ -6,48 +6,71 @@ namespace AniPlayable.InstanceAnimation
     
     public class RuntimeAnimatorMachine: Node
     {
-        public int layerIndex { get { return machineInfo.layerIndex; } }
-        public int index { get { return machineInfo.index; } }
-        public string defaultName { get { return machineInfo.defaultName; } }
-        public int defaultHashName { get { return machineInfo.defaultHashName; } }
-        public RuntimeAnimatorState defaultState { get; protected set;}
-        
+        public readonly int layerIndex;
+        public readonly int index;
+        public readonly string defaultName;
+        public readonly int defaultHashName;
+        public readonly int machineHashName;
+
+        public RuntimeAnimatorState defaultState { get; protected set; }
         AnimationStateMachineInfo machineInfo;
-        private Dictionary<int,RuntimeAnimatorState> stateList = new Dictionary<int,RuntimeAnimatorState>();
+        private RuntimeAnimatorState[] stateList;
+        private Dictionary<int,int> hashMap = new Dictionary<int, int>();
+        private int stateLength = 0;
         public RuntimeAnimatorMachine(AnimationStateMachineInfo pInfo)
         {
+            if(pInfo == null) return;
             machineInfo = pInfo;
+            layerIndex = machineInfo.layerIndex;
+            index = machineInfo.index;
+            defaultName = machineInfo.defaultName;
+            defaultHashName = machineInfo.defaultHashName;
+            machineHashName = machineInfo.machineHashName;
         }
         public override void InitNode(AnimationInstancing pAnimator)
         {
             var tpam = parameters;
-            foreach (var item in machineInfo.stateInfos)
+            stateLength = machineInfo.stateInfos.Count;
+            stateList = new RuntimeAnimatorState[stateLength];
+            for (int i = 0; i < stateLength; i++)
             {
-                var tstate = new RuntimeAnimatorState(item){parameters = tpam};
+                var item = machineInfo.stateInfos[i];
+                var tstate = new RuntimeAnimatorState(item) { parameters = tpam };
                 tstate.InitNode(pAnimator);
-                stateList.Add(tstate.nameHash,tstate);
-                if(item.hashName == machineInfo.defaultHashName)
+
+                if (tstate.nameHash == machineInfo.defaultHashName)
                 {
                     defaultState = tstate;
                 }
+                stateList[i] = tstate;
+
+                hashMap.Add(tstate.nameHash,i);
             }
+
         }
 
-        public RuntimeAnimatorState this[int pKey]
+        public RuntimeAnimatorState this[int pIndex]
         {
             get
             {
-                if(!stateList.ContainsKey(pKey)) return null;
-                return stateList[pKey];
+                if(pIndex < 0 || pIndex >= stateLength) return null;
+                return stateList[pIndex];
             }
         }
 
         #region get
         public RuntimeAnimatorState GetState(string pStateName)
         {
-            return this[pStateName.GetHashCode()];
+            return GetState(pStateName.GetHashCode());
         }
-
+        public RuntimeAnimatorState GetState(int pHash)
+        {
+            if (hashMap.TryGetValue(pHash, out int tindex))
+            {
+                return this[tindex];
+            }
+            return null;
+        }
         #endregion
 
     }
