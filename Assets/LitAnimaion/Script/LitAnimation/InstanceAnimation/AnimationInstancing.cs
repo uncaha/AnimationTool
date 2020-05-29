@@ -639,8 +639,11 @@ namespace AniPlayable.InstanceAnimation
                 }
                 else if(ttrans.destinationType == AssetTransitions.DestinationType.stateMachine)
                 {
-                    int tindex = Layers[cureState.layerIndex].GetMachineIndex(ttrans.destinationHashName);
-                    var tstate = GetState(0,cureState.layerIndex,tindex);
+                    if(ttrans.destinationIndex == -1)
+                    {
+                        ttrans.destinationIndex = Layers[cureState.layerIndex].GetMachineIndex(ttrans.destinationHashName);
+                    }
+                    var tstate = GetState(0,cureState.layerIndex,ttrans.destinationIndex);
                     CrossFade(tstate,ttrans.duration);
                 }
             }

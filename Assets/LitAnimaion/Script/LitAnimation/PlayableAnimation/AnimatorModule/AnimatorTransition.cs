@@ -13,6 +13,8 @@ namespace AniPlayable.Module
         public readonly float duration;
         public readonly float exitTime ;
 
+        public int destinationIndex = -1;
+
         AnimatorCondition[] conditions;
         int conditionLength = 0;
         public AnimatorTransition(PlayableAnimatorParameter parms,AssetTransitions.Transtions pData, int pIndex)
