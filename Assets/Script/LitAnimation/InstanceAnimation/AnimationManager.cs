@@ -111,7 +111,7 @@ namespace AniPlayable.InstanceAnimation
             if (m_animationInfo.TryGetValue(request.prefab, out info))
             {
                 find = true;
-                request.instance.Prepare(info.listAniInfo, info.extraBoneInfo);
+                request.instance.Prepare(info.listAniInfo.ToArray(), info.extraBoneInfo);
             }
 
 			if (abRequest != null && !find)
@@ -122,7 +122,7 @@ namespace AniPlayable.InstanceAnimation
                 info.listAniInfo = ReadAnimationInfo(reader);
                 info.extraBoneInfo = ReadExtraBoneInfo(reader);
                 AnimationInstancingMgr.Instance.ImportAnimationTexture(request.prefab.name, reader);
-                request.instance.Prepare(info.listAniInfo, info.extraBoneInfo);
+                request.instance.Prepare(info.listAniInfo.ToArray(), info.extraBoneInfo);
                 m_animationInfo.Add(request.prefab, info);
             }
         }

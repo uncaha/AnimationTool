@@ -48,7 +48,7 @@ namespace AniPlayable.InstanceAnimation
         public bool IsLoop() { return Mode == WrapMode.Loop; }
         public bool IsPause() { return speedParameter == 0.0f; }
 
-        public RuntimeAnimatorState cureState { get; private set; }
+        private RuntimeAnimatorState cureState ;
 
         [NonSerialized] public float curFrame;
 
@@ -67,7 +67,7 @@ namespace AniPlayable.InstanceAnimation
         [NonSerialized] public float transitionProgress = 0.0f;
         private int eventIndex = -1;
 
-        public List<AnimationInfo> aniInfo;
+        public AnimationInfo[] aniInfo;
         private ComparerHash comparer;
         private AnimationInfo searchInfo;
         private AnimationEvent aniEvent = null;
@@ -111,7 +111,7 @@ namespace AniPlayable.InstanceAnimation
                 return;
             }
             Params = new PlayableAnimatorParameter();
-            worldTransform = GetComponent<Transform>();
+            worldTransform = transform;
             animator = GetComponent<Animator>();
             boundingSpere = new BoundingSphere(new Vector3(0, 0, 0), 1.0f);
             listAttachment = new List<AnimationInstancing>();
@@ -265,10 +265,10 @@ namespace AniPlayable.InstanceAnimation
             AnimationManager.InstanceAnimationInfo info = AnimationManager.Instance.FindAnimationInfo(prototype, this);
             if (info != null)
             {
-                aniInfo = info.listAniInfo;
+                aniInfo = info.listAniInfo.ToArray();
                 PrepareParams(info.paramList);
                 PrepareLayer(info.layerList);
-                Prepare(aniInfo, info.extraBoneInfo);
+                Prepare(aniInfo,info.extraBoneInfo);
             }
             
             return true;
@@ -288,10 +288,8 @@ namespace AniPlayable.InstanceAnimation
             Layers.InitNode(this);
         }
 
-        public void Prepare(List<AnimationInfo> infoList, ExtraBoneInfo extraBoneInfo)
+        public void Prepare(AnimationInfo[] pinfos, ExtraBoneInfo extraBoneInfo)
         {
-            aniInfo = infoList;
-
             //extraBoneInfo = extraBoneInfo;
             List<Matrix4x4> bindPose = new List<Matrix4x4>(150);
             // to optimize, MergeBone don't need to call every time
@@ -363,7 +361,7 @@ namespace AniPlayable.InstanceAnimation
 
         public AnimationInfo GetCurrentAnimationInfo()
         {
-            if (aniInfo != null && 0 <= aniIndex && aniIndex < aniInfo.Count)
+            if (aniInfo != null && 0 <= aniIndex && aniIndex < aniInfo.Length)
             {
                 return aniInfo[aniIndex];
             }
@@ -372,7 +370,7 @@ namespace AniPlayable.InstanceAnimation
 
         public AnimationInfo GetPreAnimationInfo()
         {
-            if (aniInfo != null && 0 <= preAniIndex && preAniIndex < aniInfo.Count)
+            if (aniInfo != null && 0 <= preAniIndex && preAniIndex < aniInfo.Length)
             {
                 return aniInfo[preAniIndex];
             }
@@ -384,7 +382,7 @@ namespace AniPlayable.InstanceAnimation
             if (aniInfo == null)
                 return -1;
             searchInfo.animationNameHash = hash;
-            return aniInfo.BinarySearch(searchInfo, comparer);
+            return Array.BinarySearch<AnimationInfo>(aniInfo, searchInfo, comparer);
         }
         #endregion
 
@@ -427,7 +425,7 @@ namespace AniPlayable.InstanceAnimation
                 Debug.LogError("Can't found tstate by hash " + pState);
                 return;
             }
-            if(pState.motionIndex > 0)
+            if(pState.motionIndex >= 0)
             {
                 cureState = pState;
                 PlayAnimation(pState.motionIndex);
@@ -481,8 +479,8 @@ namespace AniPlayable.InstanceAnimation
             transitionDuration = 0.0f;
             transitionProgress = 1.0f;
             isInTransition = false;
-            Debug.Assert(animationIndex < aniInfo.Count);
-            if (0 <= animationIndex && animationIndex < aniInfo.Count)
+            Debug.Assert(animationIndex < aniInfo.Length);
+            if (0 <= animationIndex && animationIndex < aniInfo.Length)
             {
                 preAniIndex = aniIndex;
                 aniIndex = animationIndex;
@@ -629,7 +627,7 @@ namespace AniPlayable.InstanceAnimation
         void UpdateState()
         {
             if (cureState == null || cureState.motionIndex != aniIndex) return;
-            AnimationInfo info = GetCurrentAnimationInfo();
+            AnimationInfo info = aniInfo[aniIndex];
             float tprocess = curFrame / info.totalFrame;
 
             var ttrans = cureState.CheckTransition(tprocess);
@@ -645,8 +643,6 @@ namespace AniPlayable.InstanceAnimation
                     var tstate = GetState(0,cureState.layerIndex,tindex);
                     CrossFade(tstate,ttrans.duration);
                 }
-                
-                //CrossFadeAnimation(ttrans.destinationStateName, ttrans.duration);
             }
         }
 
@@ -785,7 +781,7 @@ namespace AniPlayable.InstanceAnimation
 
         public int GetAnimationCount()
         {
-            return aniInfo != null ? aniInfo.Count : 0;
+            return aniInfo != null ? aniInfo.Length : 0;
         }
 
         private void RefreshAttachmentAnimation(int index)

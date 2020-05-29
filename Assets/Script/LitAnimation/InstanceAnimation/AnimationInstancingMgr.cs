@@ -263,7 +263,7 @@ namespace AniPlayable.InstanceAnimation
                     ApplyRootMotion(instance);
 
                 instance.UpdateAnimation();
-                instance.boundingSpere.position = instance.transform.position;
+                instance.boundingSpere.position = instance.worldTransform.position;
                 boundingSphere[i] = instance.boundingSpere;
 
                 if (!instance.visible)
@@ -277,6 +277,7 @@ namespace AniPlayable.InstanceAnimation
                 else
                     aniTextureIndex = instance.aniTextureIndex;
 
+                Matrix4x4 worldMat = instance.worldTransform.localToWorldMatrix;
                 for (int j = 0; j != lod.vertexCacheList.Length; ++j)
                 {
                     VertexCache cache = lod.vertexCacheList[j];
@@ -312,7 +313,7 @@ namespace AniPlayable.InstanceAnimation
                         int count = pkg.instancingCount - 1;
                         if (count >= 0)
                         {
-                            Matrix4x4 worldMat = instance.worldTransform.localToWorldMatrix;
+                            
                             Matrix4x4[] arrayMat = data.worldMatrix[aniTextureIndex][index];
                             arrayMat[count].m00 = worldMat.m00;
                             arrayMat[count].m01 = worldMat.m01;

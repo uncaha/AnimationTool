@@ -5,7 +5,7 @@ namespace AniPlayable.Module
 {
     public class AnimatorCondition: AnimatorModule
     {
-        public int Index { get; private set; }
+        public readonly int Index ;
 
         public AssetCondition.AnimatorConditionMode mode;
         public float threshold;

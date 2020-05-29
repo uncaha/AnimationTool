@@ -6,23 +6,29 @@ namespace AniPlayable.Module
     public class AnimatorTransition : AnimatorModule
     {
         
-        public int Index { get; private set; }
-        public AssetTransitions.DestinationType destinationType{ get { return transtion.destinationType; } }
-        public string destinationName { get { return transtion.destinationName; } }
-        public int destinationHashName {get;private set;}
-        public float duration { get { return transtion.duration; } }
-        public float exitTime { get { return transtion.exitTime; } }
+        public readonly int Index ;
+        public readonly AssetTransitions.DestinationType destinationType;
+        public readonly string  destinationName ;
+        public readonly int destinationHashName ;
+        public readonly float duration;
+        public readonly float exitTime ;
 
-        AnimatorCondition[] conditions { get; set; }
-        protected AssetTransitions.Transtions transtion;
+        AnimatorCondition[] conditions;
+        int conditionLength = 0;
         public AnimatorTransition(PlayableAnimatorParameter parms,AssetTransitions.Transtions pData, int pIndex)
         {
-            transtion = pData;
+            AssetTransitions.Transtions transtion = pData;
             Index = pIndex;
+            duration = transtion.duration;
+            exitTime = transtion.exitTime;
+            destinationName = transtion.destinationName;
+            destinationType = transtion.destinationType;
 
+            
             if(transtion.conditions != null && transtion.conditions.Length > 0)
             {
-                conditions = new AnimatorCondition[transtion.conditions.Length];
+                conditionLength = transtion.conditions.Length;
+                conditions = new AnimatorCondition[conditionLength];
                 for (int i = 0; i < conditions.Length; i++)
                 {
                     conditions[i] = new AnimatorCondition(parms,transtion.conditions[i],i);
@@ -34,10 +40,9 @@ namespace AniPlayable.Module
 
         public bool CheckCondition()
         {
-            if(conditions == null || conditions.Length == 0) return true;
+            if(conditionLength == 0) return true;
             bool isOk = true;
-            int tlen = conditions.Length;
-            for (int i = 0; i < tlen; i++)
+            for (int i = 0; i < conditionLength; i++)
             {
                 var item = conditions[i];
                 if(!item.CheckCondition())

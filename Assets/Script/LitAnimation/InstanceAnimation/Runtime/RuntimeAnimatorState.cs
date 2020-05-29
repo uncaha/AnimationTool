@@ -6,41 +6,49 @@ namespace AniPlayable.InstanceAnimation
 {
     public class RuntimeAnimatorState : Node
     {
-        public int layerIndex {get{return stateInfo.layerIndex;}}
-        public int machineIndex {get{return stateInfo.machineIndex;}}
-        public string stateName {get{return stateInfo.name;}}
-        public int nameHash {get{return stateInfo.hashName;}}
-        public int motionHash {get; private set;}
-        public int motionIndex {get; private set;}
+        public readonly int layerIndex ;
+        public readonly int machineIndex ;
+        public readonly string stateName ;
+        public readonly int nameHash ;
+        public readonly int motionHash ;
+        public int motionIndex ;
 
-        public AnimationStateInfo stateInfo { get; protected set;}
-        public List<AnimatorTransition> animatorTransitions = new List<AnimatorTransition>();
+        private AnimationStateInfo stateInfo ;
+        private AnimatorTransition[] animatorTransitions;
+        private int transLength = 0;
 
         public RuntimeAnimatorState(AnimationStateInfo pInfo)
         {
             if(pInfo == null) return;
             stateInfo = pInfo;
+            layerIndex = stateInfo.layerIndex;
+            machineIndex = stateInfo.machineIndex;
+            stateName = stateInfo.name;
+            nameHash = stateInfo.hashName;
+
+            transLength = stateInfo.transtionList.Count;
+
             motionHash = stateInfo.motionName.GetHashCode();
         }
         public override void InitNode(AnimationInstancing pAnimator)
         {
             motionIndex = pAnimator.FindAnimationInfo(motionHash);
-            for (int i = 0; i < stateInfo.transtionList.Count; i++)
+            animatorTransitions = new AnimatorTransition[transLength];
+            for (int i = 0; i < transLength; i++)
             {
                 var item = stateInfo.transtionList[i];
                 AnimatorTransition item2 = new AnimatorTransition(parameters, item, i);
-                animatorTransitions.Add(item2);
+                animatorTransitions[i] = item2;
             }
         }
 
         public AnimatorTransition CheckTransition(float p)
         {
-            if (animatorTransitions.Count == 0) return null;
+            if (transLength == 0) return null;
 
-            var transtions = animatorTransitions;
-            for (int i = 0; i < transtions.Count; i++)
+            for (int i = 0; i < transLength; i++)
             {
-                var ttrans = transtions[i];
+                var ttrans = animatorTransitions[i];
                 if (ttrans.CheckCondition())
                 {
                     if (ttrans.exitTime < p)
