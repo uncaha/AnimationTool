@@ -21,62 +21,48 @@ namespace AniPlayable.InstanceAnimation
             public List<AnimationInfo> listAniInfo;
             public ExtraBoneInfo extraBoneInfo;
         }
-        private List<CreateAnimationRequest> m_requestList;
-        private Dictionary<GameObject, InstanceAnimationInfo> m_animationInfo;
+
+        private Dictionary<string, InstanceAnimationInfo> m_animationInfo;
 
         private AssetBundle m_mainBundle;
         bool m_useBundle = false;
 
         protected override void InitMgr()
         {
-            m_animationInfo = new Dictionary<GameObject, InstanceAnimationInfo>();
-            m_requestList = new List<CreateAnimationRequest>();
-        }
-
-        private void Update()
-        {
-            if (m_mainBundle == null || m_requestList.Count == 0)
-                return;
-
-            for (int i = 0; i != m_requestList.Count; ++i)
-            {
-                CreateAnimationRequest request = m_requestList[i];
-                StartCoroutine(LoadAnimationInfoFromAssetBundle(request));
-            }
-            m_requestList.Clear();
+            m_animationInfo = new Dictionary<string, InstanceAnimationInfo>();
         }
 
         public InstanceAnimationInfo FindAnimationInfo(GameObject prefab, AnimationInstancing instance)
         {
             Debug.Assert(prefab != null);
             InstanceAnimationInfo info = null;
-            if (m_animationInfo.TryGetValue(prefab, out info))
+            if (m_animationInfo.TryGetValue(prefab.name, out info))
             {
                 return info;
             }
 
-// #if UNITY_IPHONE || UNITY_ANDROID
-//             Debug.Assert(m_useBundle);
-// 			if (m_mainBundle == null)
-//             	Debug.LogError("You should call LoadAnimationAssetBundle first.");
-// #endif
-//             if (m_useBundle)
-//             {
-//                 CreateAnimationRequest request = new CreateAnimationRequest();
-//                 request.prefab = prefab;
-//                 request.instance = instance;
-//                 if (m_mainBundle != null)
-//                 {
-//                     StartCoroutine(LoadAnimationInfoFromAssetBundle(request));
-//                 }
-//                 else
-//                 {
-//                     m_requestList.Add(request);
-//                 }
-//                 return null;
-//             }
-//             else
-                return CreateAnimationInfoFromFile(prefab);
+            // #if UNITY_IPHONE || UNITY_ANDROID
+            //             Debug.Assert(m_useBundle);
+            // 			if (m_mainBundle == null)
+            //             	Debug.LogError("You should call LoadAnimationAssetBundle first.");
+            // #endif
+            //             if (m_useBundle)
+            //             {
+            //                 CreateAnimationRequest request = new CreateAnimationRequest();
+            //                 request.prefab = prefab;
+            //                 request.instance = instance;
+            //                 if (m_mainBundle != null)
+            //                 {
+            //                     StartCoroutine(LoadAnimationInfoFromAssetBundle(request));
+            //                 }
+            //                 else
+            //                 {
+            //                     m_requestList.Add(request);
+            //                 }
+            //                 return null;
+            //             }
+            //             else
+            return CreateAnimationInfoFromFile(prefab);
         }
 
         public IEnumerator LoadAnimationAssetBundle(string path)
@@ -99,34 +85,6 @@ namespace AniPlayable.InstanceAnimation
                 m_mainBundle.Unload(false);
             }
         }
-
-        private IEnumerator LoadAnimationInfoFromAssetBundle(CreateAnimationRequest request)
-        {
-            Debug.Assert(m_mainBundle);
-            AssetBundleRequest abRequest = m_mainBundle.LoadAssetAsync(request.prefab.name);
-            yield return abRequest;
-
-            bool find = false;
-            InstanceAnimationInfo info = null;
-            if (m_animationInfo.TryGetValue(request.prefab, out info))
-            {
-                find = true;
-                request.instance.Prepare(info.listAniInfo.ToArray(), info.extraBoneInfo);
-            }
-
-			if (abRequest != null && !find)
-            {
-                TextAsset asset = abRequest.asset as TextAsset;
-                BinaryReader reader = new BinaryReader(new MemoryStream(asset.bytes));
-                info = new InstanceAnimationInfo();
-                info.listAniInfo = ReadAnimationInfo(reader);
-                info.extraBoneInfo = ReadExtraBoneInfo(reader);
-                AnimationInstancingMgr.Instance.ImportAnimationTexture(request.prefab.name, reader);
-                request.instance.Prepare(info.listAniInfo.ToArray(), info.extraBoneInfo);
-                m_animationInfo.Add(request.prefab, info);
-            }
-        }
-
         private InstanceAnimationInfo CreateAnimationInfoFromFile(GameObject prefab)
         {
             Debug.Assert(prefab != null);
@@ -143,7 +101,7 @@ namespace AniPlayable.InstanceAnimation
             info.layerList = ReadLayers(reader);
             info.listAniInfo = ReadAnimationInfo(reader);
             info.extraBoneInfo = ReadExtraBoneInfo(reader);
-            m_animationInfo.Add(prefab, info);
+            m_animationInfo.Add(prefab.name, info);
             AnimationInstancingMgr.Instance.ImportAnimationTexture(prefab.name, reader);
             reader.Close();
             Resources.UnloadAsset(tdata);
