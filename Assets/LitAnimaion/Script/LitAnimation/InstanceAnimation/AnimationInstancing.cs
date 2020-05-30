@@ -19,6 +19,7 @@ namespace AniPlayable.InstanceAnimation
         private Animator animator = null;
 
         #region serialized field
+        public string aniFilename = "";
         public GameObject prototype;
         public BoundingSphere boundingSpere;
         public bool visible { get; set; }
@@ -251,7 +252,7 @@ namespace AniPlayable.InstanceAnimation
             {
                 // This is only a MeshRenderer, it has no animations.
                 isMeshRender = true;
-                AnimationInstancingMgr.Instance.AddMeshVertex(prototype.name,
+                AnimationInstancingMgr.Instance.AddMeshVertex(aniFilename,
                     lodInfo,
                     null,
                     null,
@@ -262,7 +263,7 @@ namespace AniPlayable.InstanceAnimation
             searchInfo = new AnimationInfo();
             comparer = new ComparerHash();
 
-            AnimationManager.InstanceAnimationInfo info = AnimationManager.Instance.FindAnimationInfo(prototype, this);
+            AnimationManager.InstanceAnimationInfo info = AnimationManager.Instance.FindAnimationInfo(aniFilename, this);
             if (info != null)
             {
                 aniInfo = info.listAniInfo.ToArray();
@@ -316,7 +317,7 @@ namespace AniPlayable.InstanceAnimation
             }
 
 
-            AnimationInstancingMgr.Instance.AddMeshVertex(prototype.name,
+            AnimationInstancingMgr.Instance.AddMeshVertex(aniFilename,
                 lodInfo,
                 allTransforms,
                 bindPose,
@@ -745,7 +746,7 @@ namespace AniPlayable.InstanceAnimation
                 return;
             }
 
-            AnimationInstancingMgr.Instance.AddMeshVertex(attachment.prototype.name,
+            AnimationInstancingMgr.Instance.AddMeshVertex(attachment.aniFilename,
                         attachment.lodInfo,
                         null,
                         null,

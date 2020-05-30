@@ -24,6 +24,7 @@ namespace AniPlayable.InstanceAnimation
         private GameObject generatedObject;
         [SerializeField]
         private GameObject generatedPrefab;
+        private AnimationInstancing generatedScript;
         [SerializeField]
         private GameObject generatedFbx;
         private bool exposeAttachments;
@@ -157,7 +158,7 @@ namespace AniPlayable.InstanceAnimation
                         {
                             PrepareBoneTexture(aniInfo);
                             SetupAnimationTexture(aniInfo);
-                            SaveAnimationInfo(generatedPrefab.name, workingInfo);
+                            SaveAnimationInfo(generatedScript.aniFilename, workingInfo);
 
                             Debug.Log("Complete !!!!");
                         }
@@ -201,7 +202,8 @@ namespace AniPlayable.InstanceAnimation
                 generateAnims.Clear();
                 customClips.Clear();
                 generatedPrefab = prefab;
-
+                SetFileName(generatedPrefab);
+                generatedScript = generatedPrefab?.GetComponent<AnimationInstancing>();
                 SkinnedMeshRenderer[] meshRender = generatedPrefab.GetComponentsInChildren<SkinnedMeshRenderer>();
                 List<Matrix4x4> bindPose = new List<Matrix4x4>(150);
                 boneTransform = RuntimeHelper.MergeBone(meshRender, bindPose);
@@ -338,7 +340,9 @@ namespace AniPlayable.InstanceAnimation
             {
                 if (GUILayout.Button(string.Format("Generate")))
                 {
-                    string tfile = GetFullPahtFile(generatedPrefab.name);
+                    SetFileName(generatedPrefab);
+
+                    string tfile = GetFullPahtFile(generatedScript.aniFilename);
                     if (File.Exists(tfile))
                     {
                         if (EditorUtility.DisplayDialog("Export To Animation", string.Format("{0} is already in path {1}.",generatedPrefab.name,tfile), "OverWrite", "cancel"))
@@ -351,6 +355,15 @@ namespace AniPlayable.InstanceAnimation
                     }
                     
                 }
+            }
+        }
+
+        void SetFileName(GameObject pObj)
+        {
+            var tsc = pObj?.GetComponent<AnimationInstancing>();
+            if (string.IsNullOrEmpty(tsc.aniFilename))
+            {
+                tsc.aniFilename = pObj.name;
             }
         }
         void BakeWithAnimator()
@@ -429,6 +442,7 @@ namespace AniPlayable.InstanceAnimation
                     return;
                 }
                 instance.prototype = generatedPrefab;
+                SetFileName(generatedPrefab);
 
                 var controller = animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;
                 var tlayers = controller.layers;

@@ -32,11 +32,11 @@ namespace AniPlayable.InstanceAnimation
             m_animationInfo = new Dictionary<string, InstanceAnimationInfo>();
         }
 
-        public InstanceAnimationInfo FindAnimationInfo(GameObject prefab, AnimationInstancing instance)
+        public InstanceAnimationInfo FindAnimationInfo(string pFileName, AnimationInstancing instance)
         {
-            Debug.Assert(prefab != null);
+            Debug.Assert(pFileName != null);
             InstanceAnimationInfo info = null;
-            if (m_animationInfo.TryGetValue(prefab.name, out info))
+            if (m_animationInfo.TryGetValue(pFileName, out info))
             {
                 return info;
             }
@@ -62,7 +62,7 @@ namespace AniPlayable.InstanceAnimation
             //                 return null;
             //             }
             //             else
-            return CreateAnimationInfoFromFile(prefab);
+            return CreateAnimationInfoFromFile(pFileName);
         }
 
         public IEnumerator LoadAnimationAssetBundle(string path)
@@ -85,10 +85,10 @@ namespace AniPlayable.InstanceAnimation
                 m_mainBundle.Unload(false);
             }
         }
-        private InstanceAnimationInfo CreateAnimationInfoFromFile(GameObject prefab)
+        private InstanceAnimationInfo CreateAnimationInfoFromFile(string pFileName)
         {
-            Debug.Assert(prefab != null);
-            string path = "AnimationTexture/" + prefab.name;
+            Debug.Assert(!string.IsNullOrEmpty(pFileName));
+            string path = "AnimationTexture/" + pFileName;
             TextAsset tdata = Resources.Load<TextAsset>(path);
             if(tdata == null)
             {
@@ -101,8 +101,8 @@ namespace AniPlayable.InstanceAnimation
             info.layerList = ReadLayers(reader);
             info.listAniInfo = ReadAnimationInfo(reader);
             info.extraBoneInfo = ReadExtraBoneInfo(reader);
-            m_animationInfo.Add(prefab.name, info);
-            AnimationInstancingMgr.Instance.ImportAnimationTexture(prefab.name, reader);
+            m_animationInfo.Add(pFileName, info);
+            AnimationInstancingMgr.Instance.ImportAnimationTexture(pFileName, reader);
             reader.Close();
             Resources.UnloadAsset(tdata);
             return info;
