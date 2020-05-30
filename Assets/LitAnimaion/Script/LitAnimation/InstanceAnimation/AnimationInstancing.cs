@@ -20,7 +20,6 @@ namespace AniPlayable.InstanceAnimation
 
         #region serialized field
         public string aniFilename = "";
-        public GameObject prototype;
         public BoundingSphere boundingSpere;
         public bool visible { get; set; }
         public AnimationInstancing parentInstance { get; set; }
@@ -241,12 +240,11 @@ namespace AniPlayable.InstanceAnimation
 
         public bool InitializeAnimation()
         {
-            if (prototype == null)
+            if (String.IsNullOrEmpty(aniFilename))
             {
-                Debug.LogError("The prototype is NULL. Please select the prototype first.");
+                Debug.LogError("The aniFilename is NULL. Please select the aniFilename first.");
             }
-            Debug.Assert(prototype != null);
-            GameObject thisPrefab = prototype;
+
             isMeshRender = false;
             if (lodInfo[0].skinnedMeshRenderer.Length == 0)
             {
@@ -400,12 +398,29 @@ namespace AniPlayable.InstanceAnimation
             }
             if (tlayer[pMechine] == null)
             {
-                Debug.LogError("the layer is not have defaultState. layer =" + pLayer);
+                Debug.LogError(string.Format("the layer is not have machine. layer = {0} pMechine = {1}" ,pLayer, pMechine));
                 return null;
             }
 
             return pHashState == 0 ? tlayer[pMechine].defaultState : tlayer[pMechine].GetState(pHashState);
         }
+
+        public RuntimeAnimatorState GetStateByIndex(int pIndex, int pLayer, int pMechine = 0)
+        {
+            RuntimeAnimatorLayer tlayer = Layers[pLayer];
+            if (tlayer == null)
+            {
+                Debug.LogError("Can't found layer by index " + pLayer);
+                return null;
+            }
+            if (tlayer[pMechine] == null)
+            {
+                Debug.LogError(string.Format("the layer is not have machine. layer = {0} pMechine = {1}" ,pLayer, pMechine));
+                return null;
+            }
+            return tlayer[pMechine][pIndex];
+        }
+
         public void Play()
         {
             PlayState(GetState(0,0));
@@ -634,9 +649,10 @@ namespace AniPlayable.InstanceAnimation
             var ttrans = cureState.CheckTransition(tprocess);
             if (ttrans != null)
             {
+                RuntimeAnimatorState tstate = null;
                 if(ttrans.destinationType == AssetTransitions.DestinationType.state)
                 {
-                    CrossFade(ttrans.destinationHashName,ttrans.duration,cureState.layerIndex,cureState.machineIndex);
+                    tstate = GetState(ttrans.destinationHashName,cureState.layerIndex,cureState.machineIndex);
                 }
                 else if(ttrans.destinationType == AssetTransitions.DestinationType.stateMachine)
                 {
@@ -644,9 +660,18 @@ namespace AniPlayable.InstanceAnimation
                     {
                         ttrans.destinationIndex = Layers[cureState.layerIndex].GetMachineIndex(ttrans.destinationHashName);
                     }
-                    var tstate = GetState(0,cureState.layerIndex,ttrans.destinationIndex);
-                    CrossFade(tstate,ttrans.duration);
+                    tstate = GetState(0,cureState.layerIndex,ttrans.destinationIndex);
                 }
+                
+                if (tstate == null)
+                {
+                    Pause();
+                }
+                else
+                {
+                    CrossFade(tstate, ttrans.duration);
+                }
+                
             }
         }
 

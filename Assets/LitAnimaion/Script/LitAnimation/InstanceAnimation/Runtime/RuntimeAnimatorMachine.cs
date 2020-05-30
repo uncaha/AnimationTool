@@ -59,6 +59,14 @@ namespace AniPlayable.InstanceAnimation
         }
 
         #region get
+        public int GetStateIndex(int pHash)
+        {
+            if (hashMap.TryGetValue(pHash, out int tindex))
+            {
+                return tindex;
+            }
+            return -1;
+        }
         public RuntimeAnimatorState GetState(string pStateName)
         {
             return GetState(pStateName.GetHashCode());

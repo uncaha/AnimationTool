@@ -441,7 +441,6 @@ namespace AniPlayable.InstanceAnimation
                     Debug.LogError("You should select a prefab with AnimationInstancing component.");
                     return;
                 }
-                instance.prototype = generatedPrefab;
                 SetFileName(generatedPrefab);
 
                 var controller = animator.runtimeAnimatorController as UnityEditor.Animations.AnimatorController;

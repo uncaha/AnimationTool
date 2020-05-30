@@ -163,7 +163,6 @@ namespace AniPlayable.InstanceAnimation
             GameObject obj = Instantiate(prefab, Vector3.zero, Quaternion.identity);
             AnimationInstancing script = obj.GetComponent<AnimationInstancing>();
             AnimationInstancing prototypeScript = prefab.GetComponent<AnimationInstancing>();
-            script.prototype = prototypeScript.prototype;
             return obj;
         }
 

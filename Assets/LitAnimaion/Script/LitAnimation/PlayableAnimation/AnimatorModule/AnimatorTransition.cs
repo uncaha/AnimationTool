@@ -12,6 +12,7 @@ namespace AniPlayable.Module
         public readonly int destinationHashName ;
         public readonly float duration;
         public readonly float exitTime ;
+        public readonly int ownerMachineIndex = 0;
 
         public int destinationIndex = -1;
 
@@ -38,6 +39,7 @@ namespace AniPlayable.Module
             }
 
             destinationHashName = destinationName.GetHashCode();
+            ownerMachineIndex = transtion.ownerMachineIndex;
         }
 
         public bool CheckCondition()
