@@ -209,6 +209,21 @@ namespace AniPlayable.InstanceAnimation
                 boneTransform = RuntimeHelper.MergeBone(meshRender, bindPose);
             }
 
+            if(generatedPrefab == null)
+            {
+                EditorGUILayout.LabelField("Error: the object is null");
+                return;
+            }
+
+            if(generatedScript != null) 
+            {
+                generatedScript.aniFilename = EditorGUILayout.TextField("aniFilename",generatedScript.aniFilename);
+            }else
+            {
+                EditorGUILayout.LabelField("Error: the object is not have AnimationInstancing");
+                return;
+            }
+
             bool error = false;
             if (generatedPrefab)
             {
@@ -361,6 +376,7 @@ namespace AniPlayable.InstanceAnimation
         void SetFileName(GameObject pObj)
         {
             var tsc = pObj?.GetComponent<AnimationInstancing>();
+            if(tsc == null) return;
             if (string.IsNullOrEmpty(tsc.aniFilename))
             {
                 tsc.aniFilename = pObj.name;
