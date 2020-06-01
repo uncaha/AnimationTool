@@ -43,8 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 14026134e0bc44b6f9f655530d185063, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  aniFilename: AdeliePenguin_FBX
-  prototype: {fileID: 7597337500905717790}
+  aniFilename: testbuilda2
   playSpeed: 1
   shadowCastingMode: 1
   receiveShadow: 1

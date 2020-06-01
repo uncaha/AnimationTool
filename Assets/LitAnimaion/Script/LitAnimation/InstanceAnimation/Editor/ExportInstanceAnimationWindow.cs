@@ -355,12 +355,21 @@ namespace AniPlayable.InstanceAnimation
             {
                 if (GUILayout.Button(string.Format("Generate")))
                 {
-                    SetFileName(generatedPrefab);
-
+                    if(string.IsNullOrEmpty(generatedScript.aniFilename))
+                    {
+                        if (EditorUtility.DisplayDialog("Setting FileName for Animation ", string.Format("Set AniFileName To {0} ?.",generatedPrefab.name), "Set ", "cancel"))
+                        {
+                            SetFileName(generatedPrefab);
+                        }else
+                        {
+                            return;
+                        }
+                    }
+                    
                     string tfile = GetFullPahtFile(generatedScript.aniFilename);
                     if (File.Exists(tfile))
                     {
-                        if (EditorUtility.DisplayDialog("Export To Animation", string.Format("{0} is already in path {1}.",generatedPrefab.name,tfile), "OverWrite", "cancel"))
+                        if (EditorUtility.DisplayDialog("Export To Animation", string.Format("{0} is already in path {1}.",generatedScript.aniFilename,tfile), "OverWrite", "cancel"))
                         {
                             BakeWithAnimator();
                         }
