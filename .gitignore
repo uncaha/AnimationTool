@@ -7,3 +7,7 @@ Assembly-CSharp-Editor.csproj
 Library
 Temp
 obj
+Packages
+Logs
+Logs
+Logs/Packages-Update.log
