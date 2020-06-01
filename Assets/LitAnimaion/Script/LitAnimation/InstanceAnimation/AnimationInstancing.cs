@@ -39,6 +39,7 @@ namespace AniPlayable.InstanceAnimation
         [NonSerialized] public Transform worldTransform;
         [NonSerialized] public int layer;
         float speedParameter = 1.0f, cacheParameter = 1.0f;
+        [NonSerialized]public float curProcess = 0;
         WrapMode wrapMode;
         public WrapMode Mode
         {
@@ -578,7 +579,7 @@ namespace AniPlayable.InstanceAnimation
         {
             if (aniInfo == null || IsPause())
                 return;
-
+            
             if (isInTransition)
             {
                 transitionTimer += Time.deltaTime;
@@ -639,14 +640,14 @@ namespace AniPlayable.InstanceAnimation
             UpdateAnimationEvent();
             UpdateState();
         }
-
+        
         void UpdateState()
         {
             if (cureState == null || cureState.motionIndex != aniIndex) return;
             AnimationInfo info = aniInfo[aniIndex];
-            float tprocess = curFrame / info.totalFrame;
+            curProcess = curFrame / info.totalFrame;
 
-            var ttrans = cureState.CheckTransition(tprocess);
+            var ttrans = cureState.CheckTransition(curProcess);
             if (ttrans != null)
             {
                 RuntimeAnimatorState tstate = null;
