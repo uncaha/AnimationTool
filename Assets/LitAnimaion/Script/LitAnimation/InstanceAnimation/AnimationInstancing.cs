@@ -492,7 +492,8 @@ namespace AniPlayable.InstanceAnimation
             {
                 return;
             }
-
+            
+            curProcess = 0;
             transitionDuration = 0.0f;
             transitionProgress = 1.0f;
             isInTransition = false;
@@ -557,6 +558,7 @@ namespace AniPlayable.InstanceAnimation
             preAniIndex = -1;
             eventIndex = -1;
             curFrame = 0.0f;
+            curProcess = 0;
 
             cureState = null;
         }
@@ -645,7 +647,7 @@ namespace AniPlayable.InstanceAnimation
         {
             if (cureState == null || cureState.motionIndex != aniIndex) return;
             AnimationInfo info = aniInfo[aniIndex];
-            curProcess = curFrame / info.totalFrame;
+            curProcess = Mathf.Clamp01(curFrame / info.totalFrame);
 
             var ttrans = cureState.CheckTransition(curProcess);
             if (ttrans != null)
